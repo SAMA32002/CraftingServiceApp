@@ -1,0 +1,11 @@
+﻿@model CraftingServiceApp.Domain.Entities.Comment
+
+<h2>Comment Details</h2>
+<p><strong>Crafter:</strong> @Model.CrafterId</p>
+<p><strong>Message:</strong> @Model.Message</p>
+<p><strong>Post:</strong> @Model.PostId</p>
+<p><strong>Created At:</strong> @Model.CreatedAt</p>
+
+<a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+<a asp-action="Index">Back to List</a>
+

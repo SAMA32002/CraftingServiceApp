@@ -1,0 +1,52 @@
+﻿@model IEnumerable<CraftingServiceApp.Domain.Entities.Service>
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<section id="services">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>All Services</h2>
+            <a href="@Url.Action("Create", "Services")" class="btn btn-primary">Add Service</a>
+        </div>
+
+         <h4>Categories</h4>
+    <div class="btn-group" role="group">
+        <a href="@Url.Action("Index", "Services")" class="btn btn-outline-primary">All</a>
+        @foreach (var category in ViewBag.Categories)
+        {
+            <a href="@Url.Action("Index", "Services", new { categoryId = category.Id })" class="btn btn-outline-primary">@category.Name</a>
+        }
+    </div>
+
+        <div class="row mt-5">
+            @foreach (var service in Model)
+            {
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card-item">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-image position-relative">
+                                <a href="@Url.Action("Details", "Service", new { id = service.Id })">
+                                    <img src="@service.Image" alt="@service.Title" class="post-image img-fluid">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0 mt-2">
+                            <h5 class="mt-2">
+                                <a href="@Url.Action("Details", "Service", new { id = service.Id })">@service.Title</a>
+                            </h5>
+                            <p>
+                                @service.Description.Substring(0, Math.Min(service.Description.Length, 100))...
+                                <a href="@Url.Action("Details", "Service", new { id = service.Id })" class="text-decoration-underline fst-italic">
+                                    Read more
+                                </a>
+                            </p>
+                            <span class="fw-bold text-primary">$@service.Price</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

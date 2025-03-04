@@ -1,0 +1,6 @@
+@CraftingServiceApp.AdminAPI_HostAddress = http://localhost:5168
+
+GET {{CraftingServiceApp.AdminAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

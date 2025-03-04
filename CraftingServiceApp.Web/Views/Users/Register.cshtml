@@ -1,0 +1,120 @@
+﻿@using CraftingServiceApp.Domain.Enums
+@model CraftingServiceApp.Web.ViewModels.UserRegistrationViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Register</h2>
+            <form asp-controller="Users" asp-action="Register" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" required />
+                    <span asp-validation-for="FullName"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" required />
+                    <span asp-validation-for="Email"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" type="password" class="form-control" required />
+                    <span asp-validation-for="Password"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" required />
+                    <span asp-validation-for="PhoneNumber"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProfilePicture" class="form-label">Profile Picture</label>
+                    <input asp-for="ProfilePicture" type="file" class="form-control" />
+                    <span asp-validation-for="ProfilePicture"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label"></label>
+                    <select asp-for="Role" class="form-select" required>
+                        <option>-- Choose Role --</option>
+                        @foreach (var role in Enum.GetValues(typeof(UserRole)).Cast<UserRole>())
+                        {
+                            if (role != UserRole.Admin) // Exclude Admin
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="Role"></span>
+                </div>
+
+                <hr />
+
+                <h4>Addresses</h4>
+                <div id="addressesContainer">
+                    <div class="address-item">
+                        <div class="mb-3">
+                            <label class="form-label">Street Address</label>
+                            <input name="Addresses[0].Street" class="form-control" required />
+                            <span asp-validation-for="Addresses[0].Street"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            <input name="Addresses[0].City" class="form-control" required />
+                            <span asp-validation-for="Addresses[0].City"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Postal Code</label>
+                            <input name="Addresses[0].PostalCode" class="form-control" required />
+                            <span asp-validation-for="Addresses[0].PostalCode"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-secondary mb-3" id="addAddressBtn">Add Another Address</button>
+
+                <button type="submit" class="btn btn-success w-100">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+<script>
+    let addressIndex = 1;
+    document.getElementById("addAddressBtn").addEventListener("click", function () {
+        let container = document.getElementById("addressesContainer");
+        let newAddress = `
+            <div class="address-item">
+                <hr />
+                <div class="mb-3">
+                    <label class="form-label">Street Address</label>
+                    <input name="Addresses[${addressIndex}].Street" class="form-control" required />
+                    <span asp-validation-for="Addresses[${addressIndex}].Street"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">City</label>
+                    <input name="Addresses[${addressIndex}].City" class="form-control" required />
+                    <span asp-validation-for="Addresses[${addressIndex}].City"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Postal Code</label>
+                    <input name="Addresses[${addressIndex}].PostalCode" class="form-control" required />
+                    <span asp-validation-for="Addresses[${addressIndex}].PostalCode"></span>
+                </div>
+            </div>`;
+        container.insertAdjacentHTML("beforeend", newAddress);
+        addressIndex++;
+    });
+</script>
+}
+
