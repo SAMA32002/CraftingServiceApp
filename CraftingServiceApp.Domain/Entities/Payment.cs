@@ -1,4 +1,6 @@
 ﻿
+using CraftingServiceApp.Domain.Enums;
+
 namespace CraftingServiceApp.Domain.Entities
 {
     public class Payment
@@ -14,13 +16,4 @@ namespace CraftingServiceApp.Domain.Entities
         public ApplicationUser Crafter { get; set; }
         public Service Service { get; set; }
     }
-
-    public enum PaymentStatus
-    {
-        Pending,   // Payment not completed
-        Completed, // Payment successful
-        Failed,    // Payment failed
-        Refunded   // Payment refunded
-    }
-
 }

@@ -1,0 +1,69 @@
+﻿@model CraftingServiceApp.Web.ViewModels.ServiceDetailsViewModel
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@Model.Service.Image" class="img-fluid rounded" alt="Service Image" />
+        </div>
+        <div class="col-md-6">
+            <h2>
+                @Model.Service.Title
+                <span class="text-warning">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="@(i <= Model.AverageRating ? "fas fa-star" : "far fa-star")"></i>
+                    }
+                    (@Model.AverageRating.ToString("0.0"))
+                </span>
+            </h2>
+
+            <p><strong>Price:</strong> $@Model.Service.Price</p>
+            <p><strong>Crafter:</strong> @(Model.Service.Crafter?.UserName ?? "Unknown Crafter")</p>
+            <p><strong>Category:</strong> @(Model.Service.Category?.Name ?? "Uncategorized")</p>
+
+        </div>
+    </div>
+
+    <hr />
+
+    <h3>Client Reviews</h3>
+    @if (Model.Service.Reviews != null && Model.Service.Reviews.Any())
+    {
+        @foreach (var review in Model.Service.Reviews)
+        {
+            <div class="border p-3 mb-2">
+                <strong>@(review.Client?.UserName ?? "Anonymous")</strong> -
+                <span class="text-warning">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="@(i <= review.Rating ? "fas fa-star" : "far fa-star")"></i>
+                    }
+                </span>
+                <p>@review.Comment</p>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No reviews yet.</p>
+    }
+
+
+    <hr />
+
+    <h3>Leave a Review</h3>
+    <form asp-action="AddReview" method="post">
+        <input type="hidden" name="ServiceId" value="@Model.Service.Id" />
+        <textarea name="Comment" class="form-control" placeholder="Write your review..." required></textarea>
+        <div class="mt-2">
+            <label>Rating:</label>
+            <select name="Rating" class="form-control w-25">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <option value="@i">@i Stars</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+    </form>
+</div>

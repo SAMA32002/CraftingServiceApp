@@ -15,6 +15,7 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Address> Address { get; set; }
+        public DbSet<UserPayment> userPayments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -73,7 +74,7 @@ namespace CraftingServiceApp.Infrastructure.Data
                 .HasForeignKey(p => p.ServiceId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            /// Explicitly define foreign key for Review → Service
+            // Explicitly define foreign key for Review → Service
             builder.Entity<Review>()
                 .HasOne(r => r.Service)
                 .WithMany(s => s.Reviews)  // Ensure Service has a Reviews collection
@@ -95,6 +96,25 @@ namespace CraftingServiceApp.Infrastructure.Data
             // Set precision for Service.Price
             builder.Entity<Service>()
                 .Property(s => s.Price)
+                .HasPrecision(18, 4); // Adjust precision as needed
+
+            // Relationship: UserPayment → User (ApplicationUser)
+            builder.Entity<UserPayment>()
+                .HasOne<ApplicationUser>()
+                .WithMany()  // If you want to add navigation property, use .WithMany(u => u.Payments)
+                .HasForeignKey(up => up.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+
+            // Relationship: UserPayment → Service
+            builder.Entity<UserPayment>()
+                .HasOne<Service>()
+                .WithMany()  // If Service has a List<UserPayment> navigation property, use .WithMany(s => s.UserPayments)
+                .HasForeignKey(up => up.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+
+            // Set precision for Payment.Amount
+            builder.Entity<UserPayment>()
+                .Property(p => p.Amount)
                 .HasPrecision(18, 4); // Adjust precision as needed
         }
 

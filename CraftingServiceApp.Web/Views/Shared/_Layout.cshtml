@@ -216,7 +216,7 @@
                                 <a asp-controller="Services" asp-action="Index" class="nav-link">Services</a>
                             </li>
                             <li class="nav-item px-3 py-1 py-lg-0">
-                                <a asp-controller="Posts" asp-action="Index" class="nav-link">Posts</a>
+                                <a asp-controller="Post" asp-action="Index" class="nav-link">Posts</a>
                             </li>
 
                             <li class="nav-item search-dropdown py-3 py-lg-0 ms-3 ms-lg-5 dropdown">
@@ -273,7 +273,7 @@
                             <li class="fw-medium text-capitalize d-flex align-items-center">
                                 <svg class="text-primary me-1" width="16" height="16">
                                     <use xlink:href="#check-circle"></use>
-                                </svg><a asp-controller="Posts" asp-action="Index" class="nav-link">Posts</a>
+                                </svg><a asp-controller="Post" asp-action="Index" class="nav-link">Posts</a>
                             </li>
                         </ul>
                     </div>
@@ -382,31 +382,6 @@
         </div>
     </footer>
 
-
-    <!-- Video Popup -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-
-            <div class="modal-content">
-
-                <div class="modal-body">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <svg class="bi" width="40"
-                             height="40">
-                            <use xlink:href="#close-sharp"></use>
-                        </svg>
-                    </button>
-                    <div class="ratio ratio-16x9">
-                        <iframe class="embed-responsive-item" src="" id="video" allowscriptaccess="always"
-                                allow="autoplay"></iframe>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
 
     <script src="~/ui/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="~/ui/js/bootstrap.bundle.min.js"></script>

@@ -13,5 +13,9 @@ namespace CraftingServiceApp.Application.Interfaces
         void Delete(T entity);
         void SaveChanges();
         IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
+        Task<T> GetByIdAsync(int id);
+        Task<IEnumerable<T>> GetAllAsync();
+        Task AddAsync(T entity);
+        Task SaveAsync();
     }
 }

@@ -51,5 +51,10 @@ namespace CraftingServiceApp.Application.Interfaces
             _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
         }
+
+        public async Task<T> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+        public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
+        public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
+        public async Task SaveAsync() => await _context.SaveChangesAsync();
     }
 }

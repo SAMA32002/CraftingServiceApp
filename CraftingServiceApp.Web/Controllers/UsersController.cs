@@ -1,8 +1,13 @@
 ﻿using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Domain.Enums;
 using CraftingServiceApp.Web.ViewModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -10,15 +15,23 @@ namespace CraftingServiceApp.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UsersController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public UsersController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
 
-        public IActionResult Register()
+        public async Task<IActionResult> RegisterAsync()
         {
+            var allowedRoles = new List<string> { "Crafter", "Client" };
+            var roles = await _roleManager.Roles
+                                          .Where(r => allowedRoles.Contains(r.Name))
+                                          .ToListAsync();
+
+            ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View();
         }
         [HttpPost]
@@ -27,6 +40,12 @@ namespace CraftingServiceApp.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var role = await _roleManager.FindByIdAsync(model.RoleId);
+                if (role == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid role selected.");
+                    return View(model);
+                }
                 // Create User object
                 var user = new ApplicationUser
                 {
@@ -34,7 +53,7 @@ namespace CraftingServiceApp.Web.Controllers
                     Email = model.Email,
                     FullName = model.FullName,
                     PhoneNumber = model.PhoneNumber,
-                    Role = (UserRole)model.Role
+                    RoleId = role.Id
                 };
 
                 if (model.ProfilePicture != null)
@@ -74,6 +93,13 @@ namespace CraftingServiceApp.Web.Controllers
 
                 if (result.Succeeded)
                 {
+                    // Assign Role to User
+                    var roleResult = await _userManager.AddToRoleAsync(user, role.Name);
+                    if (!roleResult.Succeeded)
+                    {
+                        ModelState.AddModelError(string.Empty, "Failed to assign role.");
+                        return View(model);
+                    }
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -124,6 +150,7 @@ namespace CraftingServiceApp.Web.Controllers
             // Sign the user in
             await _signInManager.SignInAsync(user, model.RememberMe);
 
+           
             // Redirect to home or returnUrl if valid
             return RedirectToLocal(returnUrl);
         }

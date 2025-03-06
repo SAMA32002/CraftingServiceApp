@@ -4,7 +4,7 @@ namespace CraftingServiceApp.Application.Interfaces
 {
     public interface IPaymentService
     {
-        void ProcessPayment(Payment payment);
-        void RefundPayment(int paymentId);
+        Task<UserPayment?> CreateOrUpdatePaymentIntent(string userId, int serviceId, decimal price); // Fix serviceId type
+        Task<bool> UpdatePaymentStatus(string paymentIntentId, bool isSuccess);
     }
 }

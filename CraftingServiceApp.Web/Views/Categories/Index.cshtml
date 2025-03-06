@@ -1,0 +1,30 @@
+﻿<!-- Index.cshtml - Show all categories -->
+@model IEnumerable<CraftingServiceApp.Domain.Entities.Category>
+
+<h2>Categories</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>@category.Description</td>
+                <td>
+                    <a href="@Url.Action("Details", "Category", new { id = category.Id })" class="btn btn-primary">Details</a>
+                    <a href="@Url.Action("Edit", "Category", new { id = category.Id })" class="btn btn-warning">Edit</a>
+                    <a href="@Url.Action("Delete", "Category", new { id = category.Id })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a href="@Url.Action("Create", "Category")" class="btn btn-success">Add New Category</a>
+
+<hr />

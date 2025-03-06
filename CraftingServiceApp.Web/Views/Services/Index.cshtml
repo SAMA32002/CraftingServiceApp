@@ -1,23 +1,26 @@
-﻿@model IEnumerable<CraftingServiceApp.Domain.Entities.Service>
+﻿@using CraftingServiceApp.Domain.Enums
 
-@{
-    ViewData["Title"] = "Create";
-}
+@model IEnumerable<CraftingServiceApp.Domain.Entities.Service>
+
 
 <section id="services">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>All Services</h2>
-            <a href="@Url.Action("Create", "Services")" class="btn btn-primary">Add Service</a>
+            @if (User.IsInRole("Crafter"))
+            {
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                    Add Service
+                </button>
+            }
         </div>
 
-         <h4>Categories</h4>
     <div class="btn-group" role="group">
         <a href="@Url.Action("Index", "Services")" class="btn btn-outline-primary">All</a>
-        @foreach (var category in ViewBag.Categories)
-        {
-            <a href="@Url.Action("Index", "Services", new { categoryId = category.Id })" class="btn btn-outline-primary">@category.Name</a>
-        }
+            @foreach (var category in ViewBag.Categories)
+            {
+                <a href="@Url.Action("Index", "Services", new { categoryId = category.Value })" class="btn btn-outline-primary">@category.Text</a>
+            }
+
     </div>
 
         <div class="row mt-5">
@@ -27,18 +30,19 @@
                     <div class="card-item">
                         <div class="card border-0 bg-transparent">
                             <div class="card-image position-relative">
-                                <a href="@Url.Action("Details", "Service", new { id = service.Id })">
+                                <a href="@Url.Action("Details", "Services", new { id = service.Id })">
                                     <img src="@service.Image" alt="@service.Title" class="post-image img-fluid">
                                 </a>
                             </div>
                         </div>
                         <div class="card-body p-0 mt-2">
                             <h5 class="mt-2">
-                                <a href="@Url.Action("Details", "Service", new { id = service.Id })">@service.Title</a>
+                                <a href="@Url.Action("Details", "Services", new { id = service.Id })">@service.Title</a>
                             </h5>
+                            <p>By <strong>@(service.Crafter?.FullName ?? "Unknown")</strong></p>
                             <p>
                                 @service.Description.Substring(0, Math.Min(service.Description.Length, 100))...
-                                <a href="@Url.Action("Details", "Service", new { id = service.Id })" class="text-decoration-underline fst-italic">
+                                <a href="@Url.Action("Details", "Services", new { id = service.Id })" class="text-decoration-underline fst-italic">
                                     Read more
                                 </a>
                             </p>
@@ -50,3 +54,87 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addServiceModalLabel">Add New Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Create" method="post" id="addServiceForm" enctype="multipart/form-data">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label for="Title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="Title" name="Title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Description</label>
+                        <textarea class="form-control" id="Description" name="Description" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="Price" name="Price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="CategoryId" class="form-label">Category</label>
+                        <select class="form-control" id="CategoryId" name="CategoryId" required>
+                            <option value="">Select a category</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Value">@category.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ImageFile" class="form-label">Upload Image</label>
+                        <img id="previewImg" src="" class="img-fluid d-none" style="max-width: 100px;">
+                        <input type="file" class="form-control" id="ImageFile" name="ImageFile" onchange="previewImage(event)">
+                        <script>
+                            function previewImage(event) {
+                                var reader = new FileReader();
+                                reader.onload = function () {
+                                    var img = document.getElementById("previewImg");
+                                    img.src = reader.result;
+                                    img.classList.remove("d-none");
+                                };
+                                reader.readAsDataURL(event.target.files[0]);
+                            }
+                        </script>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Service</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        $("#addServiceForm").submit(function (e) {
+            e.preventDefault(); // Prevent full-page refresh
+
+            var formData = new FormData(this); // Get form data
+
+            $.ajax({
+                type: "POST",
+                url: "/Services/Create", // Submit to controller
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert(response.message); // Show success message
+                    $("#addServiceModal").modal("hide"); // Close modal
+                    location.reload(); // Refresh the page to show new service
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText); // Show error
+                }
+            });
+        });
+    });
+</script>

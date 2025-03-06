@@ -1,0 +1,49 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityRole>
+
+@{
+    ViewData["Title"] = "System Roles";
+}
+
+<h1>صلاحيات المستخدمين</h1>
+<p>
+    <a class="btn btn-primary" asp-action="Create"><i class="fa fa-plus"></i> إضافة صلاحية</a>
+</p>
+<div class="card">
+    @* <div class="card-header">
+        <h3 class="card-title">الصلاحيات</h3>
+    </div> *@
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table id="example1" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    @* <th>
+                        @Html.DisplayNameFor(model => model.NormalizedName)
+                    </th> *@
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        @* <td>
+                            @Html.DisplayFor(modelItem => item.NormalizedName)
+                        </td> *@
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">تعديل</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">حذف</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

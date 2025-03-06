@@ -1,5 +1,4 @@
-﻿using CraftingServiceApp.Domain.Enums;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace CraftingServiceApp.Domain.Entities
@@ -15,7 +14,9 @@ namespace CraftingServiceApp.Domain.Entities
 
         //public string Title { get; set; }
         public bool IsBanned { get; set; } = false;
-        public UserRole Role { get; set; } // Crafter, Client, Admin
+        public string RoleId { get; set; }
+        public IdentityRole Role { get; set; }
+        //public UserRole Role { get; set; } // Crafter, Client, Admin
         public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
         public virtual ICollection<Service> Services { get; set; }
     }

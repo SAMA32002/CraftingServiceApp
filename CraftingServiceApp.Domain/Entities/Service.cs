@@ -13,10 +13,10 @@ namespace CraftingServiceApp.Domain.Entities
         [NotMapped]
         public IFormFile? ImageFile { get; set; }
         public int CategoryId { get; set; }
-        public string CrafterId { get; set; }
-        public Category Category { get; set; }
-        public ApplicationUser Crafter { get; set; }
-        public virtual ICollection<Review> Reviews { get; set; }
+        public string CrafterId { get; set; } = "de273080-a435-4ae7-b768-f08345ef4dab";
+        public Category? Category { get; set; }
+        public ApplicationUser? Crafter { get; set; }
+        public virtual ICollection<Review>? Reviews { get; set; }
     }
 
 }

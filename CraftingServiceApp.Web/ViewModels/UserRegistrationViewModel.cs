@@ -1,5 +1,4 @@
-﻿using CraftingServiceApp.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CraftingServiceApp.Web.ViewModels
 {
@@ -29,8 +28,7 @@ namespace CraftingServiceApp.Web.ViewModels
 
         [Required]
         [Display(Name = "Role")]
-        public UserRole Role { get; set; } // "Client" or "Crafter"
-
+        public string RoleId { get; set; }
         public List<AddressViewModel> Addresses { get; set; } = new List<AddressViewModel>();
     }
 
