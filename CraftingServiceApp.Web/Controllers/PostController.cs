@@ -8,6 +8,7 @@ using CraftingServiceApp.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using CraftingServiceApp.BLL.Interfaces;
 using Stripe;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -60,12 +61,18 @@ namespace CraftingServiceApp.Web.Controllers
         }
 
         // POST: Post/Create
+        [Authorize(Roles = "Client")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClientId,Title,Description,CategoryId,Status")] Post post)
+        public async Task<IActionResult> Create(Post post)
         {
+            post.ClientId = _userManager.GetUserId(User); // Get current user ID
+
+            ModelState.Clear();
+            TryValidateModel(post);
+
             if (ModelState.IsValid)
-            {
+            {                
                 _PostRepository.Add(post);
                 await _PostRepository.SaveAsync();
                 return RedirectToAction(nameof(Index));

@@ -14,14 +14,14 @@
             }
         </div>
 
-    <div class="btn-group" role="group">
-        <a href="@Url.Action("Index", "Services")" class="btn btn-outline-primary">All</a>
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Index", "Services")" class="btn btn-outline-primary">All</a>
             @foreach (var category in ViewBag.Categories)
             {
                 <a href="@Url.Action("Index", "Services", new { categoryId = category.Value })" class="btn btn-outline-primary">@category.Text</a>
             }
 
-    </div>
+        </div>
 
         <div class="row mt-5">
             @foreach (var service in Model)
@@ -40,7 +40,10 @@
                                 <a href="@Url.Action("Details", "Services", new { id = service.Id })">@service.Title</a>
                             </h5>
                             <p>By <strong>@(service.Crafter?.FullName ?? "Unknown")</strong></p>
-                            <p>
+                            @{
+                                
+                           }
+                           <p>
                                 @service.Description.Substring(0, Math.Min(service.Description.Length, 100))...
                                 <a href="@Url.Action("Details", "Services", new { id = service.Id })" class="text-decoration-underline fst-italic">
                                     Read more

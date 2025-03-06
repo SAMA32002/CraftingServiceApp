@@ -8,8 +8,8 @@ namespace CraftingServiceApp.Domain.Entities
         public int ServiceId { get; set; }
         public string Comment { get; set; }
         public int Rating { get; set; }
-        public ApplicationUser Client { get; set; }
-        public Service Service { get; set; }
+        public ApplicationUser? Client { get; set; }
+        public Service? Service { get; set; }
     }
 
 }

@@ -1,12 +1,12 @@
 ﻿using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.Domain.Entities;
+using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -16,37 +16,53 @@ namespace CraftingServiceApp.Web.Controllers
         private readonly IRepository<Service> _ServiceRepository;
         private readonly IRepository<Category> _CategoRyrepository;
         private readonly IRepository<Review> _ReviewRepository;
-        private readonly IServiceService _ServicesService;
-        private readonly IUserRepository _UserService;
+        private readonly ApplicationDbContext _context;
 
-        public ServicesController(UserManager<ApplicationUser> userManager, IRepository<Service> serviceRepository, IRepository<Category> categoRyrepository, IRepository<Review> reviewRepository, IServiceService servicesService)
+        public ServicesController(UserManager<ApplicationUser> userManager, IRepository<Service> serviceRepository, IRepository<Category> categoRyrepository, IRepository<Review> reviewRepository, ApplicationDbContext context)
         {
             _userManager = userManager;
             _ServiceRepository = serviceRepository;
             _CategoRyrepository = categoRyrepository;
             _ReviewRepository = reviewRepository;
-            _ServicesService = servicesService;
+            _context = context;
         }
 
 
         // Index: Display all services
+        //public IActionResult Index(int? categoryId)
+        //{
+        //    var services = _ServiceRepository.GetAll();
+        //    ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
+
+        //    if (categoryId.HasValue)
+        //    {
+        //        services = _ServicesService.GetServicesByCategory(categoryId.Value);
+        //    }
+
+        //    return View(services);
+        //}
         public IActionResult Index(int? categoryId)
         {
-            var services = _ServiceRepository.GetAll();
+            var services = _context.Services.Include(s => s.Crafter).ToList(); // Ensure Crafter is included
             ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
             if (categoryId.HasValue)
             {
-                services = _ServicesService.GetServicesByCategory(categoryId.Value);
+                services = services.Where(s => s.CategoryId == categoryId.Value).ToList();
             }
 
             return View(services);
         }
 
         // Details: Display a single service
-        public IActionResult Details(int id)
+        public async Task<IActionResult> DetailsAsync(int id)
         {
-            var service = _ServiceRepository.GetById(id);
+            //var service = _ServiceRepository.GetById(id);
+            var service = await _context.Services
+                .Include(s => s.Reviews)
+                .ThenInclude(r => r.Client) // Ensures Client details are loaded
+                .FirstOrDefaultAsync(s => s.Id == id);
+
             ViewData["CategoryId"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
             if (service == null)
             {
@@ -74,12 +90,19 @@ namespace CraftingServiceApp.Web.Controllers
         [Authorize] // Ensure only logged-in users can submit reviews
         public async Task<IActionResult> AddReview(Review review)
         {
+            review.ClientId = _userManager.GetUserId(User); // Get current user ID
+
+            ModelState.Clear();
+            TryValidateModel(review);
+
             if (!ModelState.IsValid)
             {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                      .Select(e => e.ErrorMessage)
+                                      .ToList();
                 return RedirectToAction("Details", new { id = review.ServiceId });
             }
 
-            review.ClientId = _userManager.GetUserId(User); // Get current user ID
             _ReviewRepository.Add(review);
             _ReviewRepository.SaveChanges();
 
@@ -100,24 +123,19 @@ namespace CraftingServiceApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Service service)
         {
+            service.CrafterId = _userManager.GetUserId(User); // Get current user ID
+
+            ModelState.Clear();
+            TryValidateModel(service);
+
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors)
                                       .Select(e => e.ErrorMessage)
                                       .ToList();
-
-                return Json(new { success = false, message = "Invalid data. Please try again." });
+                ViewData["CategoryId"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
+                return RedirectToAction(nameof(Index));
             }
-
-            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get logged-in user ID
-            //var crafter = _UserService.GetById(userId);
-
-            //if (crafter == null)
-            //{
-            //    return Unauthorized(); // Prevent unauthorized users from adding a service
-            //}
-
-            service.CrafterId = _userManager.GetUserId(User); // Get current user ID
 
             if (service.ImageFile != null)
             {

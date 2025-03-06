@@ -17,7 +17,7 @@
                 </span>
             </h2>
 
-            <p><strong>Price:</strong> $@Model.Service.Price</p>
+            <p><strong>Price:</strong>@Model.Service.Price EGP</p>
             <p><strong>Crafter:</strong> @(Model.Service.Crafter?.UserName ?? "Unknown Crafter")</p>
             <p><strong>Category:</strong> @(Model.Service.Category?.Name ?? "Uncategorized")</p>
 
@@ -51,19 +51,22 @@
 
     <hr />
 
-    <h3>Leave a Review</h3>
-    <form asp-action="AddReview" method="post">
-        <input type="hidden" name="ServiceId" value="@Model.Service.Id" />
-        <textarea name="Comment" class="form-control" placeholder="Write your review..." required></textarea>
-        <div class="mt-2">
-            <label>Rating:</label>
-            <select name="Rating" class="form-control w-25">
-                @for (int i = 1; i <= 5; i++)
-                {
-                    <option value="@i">@i Stars</option>
-                }
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
-    </form>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <h3>Leave a Review</h3>
+        <form asp-action="AddReview" method="post">
+            <input type="hidden" name="ServiceId" value="@Model.Service.Id" />
+            <textarea name="Comment" class="form-control" placeholder="Write your review..." required></textarea>
+            <div class="mt-2">
+                <label>Rating:</label>
+                <select name="Rating" class="form-control w-25">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <option value="@i">@i Stars</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+        </form>
+    }
 </div>

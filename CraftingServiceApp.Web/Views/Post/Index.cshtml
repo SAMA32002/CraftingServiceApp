@@ -3,9 +3,13 @@
 <section id="services">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPostModal">
-                Add Post
+            @if (User.IsInRole("Client"))
+            {
+
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPostModal">
+                    Add Post
             </button>
+            }
         </div>
 
         <div class="btn-group" role="group">
