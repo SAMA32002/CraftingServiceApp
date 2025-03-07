@@ -8,18 +8,18 @@
         <div class="col-md-6">
             <h2>
                 @Model.Service.Title
-                <span class="text-warning">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        <i class="@(i <= Model.AverageRating ? "fas fa-star" : "far fa-star")"></i>
-                    }
-                    (@Model.AverageRating.ToString("0.0"))
-                </span>
             </h2>
-
+            <span class="text-warning">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="@(i <= Model.AverageRating ? "fas fa-star" : "far fa-star")"></i>
+                }
+                (@Model.AverageRating.ToString("0.0"))
+            </span>
             <p><strong>Price:</strong>@Model.Service.Price EGP</p>
             <p><strong>Crafter:</strong> @(Model.Service.Crafter?.UserName ?? "Unknown Crafter")</p>
             <p><strong>Category:</strong> @(Model.Service.Category?.Name ?? "Uncategorized")</p>
+            <p><strong>Description:</strong> @Model.Service.Description</p>
 
         </div>
     </div>

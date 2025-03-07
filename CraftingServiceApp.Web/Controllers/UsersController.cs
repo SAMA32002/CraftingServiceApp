@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using CraftingServiceApp.Infrastructure.Data;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -16,13 +18,49 @@ namespace CraftingServiceApp.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
 
-        public UsersController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
+        public UsersController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = context;
         }
+
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _context.Users
+                .Include(u => u.Services) // Crafter's services
+                .Include(u => u.SentRequests) // Client's requests
+                .Include(u => u.ReceivedRequests) // Crafter's received requests
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Get user's roles
+            var roles = await _userManager.GetRolesAsync(user);
+            bool isCrafter = roles.Contains("Crafter"); // Check if the user has the 'Crafter' role
+
+
+            var viewModel = new ProfileViewModel
+            {
+                User = user,
+                IsCrafter = isCrafter,
+                Services = user.Services?.ToList() ?? new List<Service>(),
+                ReceivedRequests = user.ReceivedRequests?.ToList() ?? new List<Request>(),
+                SentRequests = user.SentRequests?.ToList() ?? new List<Request>(),
+                Posts = _context.Posts.Where(p => p.ClientId == userId).ToList() // If posts exist
+            };
+
+            return View(viewModel);
+        }
+
 
         public async Task<IActionResult> RegisterAsync()
         {

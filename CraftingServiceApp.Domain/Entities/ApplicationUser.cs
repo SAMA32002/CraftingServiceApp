@@ -19,5 +19,8 @@ namespace CraftingServiceApp.Domain.Entities
         //public UserRole Role { get; set; } // Crafter, Client, Admin
         public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
         public virtual ICollection<Service> Services { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
+        public List<Request> SentRequests { get; set; } = new();  // Requests made by the client
+        public List<Request> ReceivedRequests { get; set; } = new(); // Requests received as a crafter
     }
 }

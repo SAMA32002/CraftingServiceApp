@@ -17,6 +17,7 @@ namespace CraftingServiceApp.Domain.Entities
         public Category? Category { get; set; }
         public ApplicationUser? Crafter { get; set; }
         public virtual ICollection<Review>? Reviews { get; set; }
+        public List<Request> Requests { get; set; } = new();
     }
 
 }

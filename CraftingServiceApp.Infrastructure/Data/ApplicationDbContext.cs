@@ -1,4 +1,5 @@
 ﻿using CraftingServiceApp.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
@@ -17,10 +18,17 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Address> Address { get; set; }
         public DbSet<UserPayment> userPayments { get; set; }
+        public DbSet<Request> Requests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<IdentityUserRole<string>>()
+                .HasOne<IdentityRole>()
+                .WithMany()
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Service & Category Relationship
             builder.Entity<Service>()
@@ -102,7 +110,7 @@ namespace CraftingServiceApp.Infrastructure.Data
             // Relationship: UserPayment → User (ApplicationUser)
             builder.Entity<UserPayment>()
                 .HasOne<ApplicationUser>()
-                .WithMany()  // If you want to add navigation property, use .WithMany(u => u.Payments)
+                .WithMany()
                 .HasForeignKey(up => up.UserId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
 
@@ -117,6 +125,36 @@ namespace CraftingServiceApp.Infrastructure.Data
             builder.Entity<UserPayment>()
                 .Property(p => p.Amount)
                 .HasPrecision(18, 4); // Adjust precision as needed
+
+            // Relationship: Request belongs to a Client(User)
+            builder.Entity<Request>()
+                .HasOne(r => r.Client)
+                .WithMany(u => u.SentRequests)
+                .HasForeignKey(r => r.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relationship: Request is linked to a Service
+            builder.Entity<Request>()
+                .HasOne(r => r.Service)
+                .WithMany(s => s.Requests)
+                .HasForeignKey(r => r.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Request>()
+                .Property(r => r.Status)
+                .HasConversion<string>(); // Store enum as string in the database
+
+            // User has Services (Crafter)
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.Services)
+                .WithOne(s => s.Crafter)
+                .HasForeignKey(s => s.CrafterId);
+
+            // User has Posts (Client)
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.Posts)
+                .WithOne(p => p.Client)
+                .HasForeignKey(p => p.ClientId);
         }
 
     }

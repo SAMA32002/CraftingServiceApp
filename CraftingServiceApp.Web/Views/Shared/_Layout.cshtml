@@ -14,6 +14,7 @@
 
     <!--Bootstrap ================================================== -->
     <link rel="stylesheet" type="text/css" href="~/ui/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <!--vendor css ================================================== -->
     <link rel="stylesheet" type="text/css" href="~/ui/css/vendor.css">
@@ -173,7 +174,34 @@
                         <img src="~/ui/images/main-logo.png" class="logo img-fluid">
                     </a>
                     <ul class="info d-flex flex-wrap justify-content-end align-items-center list-unstyled m-0">
-                        @if (!User.Identity.IsAuthenticated)
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-circle"></i> @User.Identity.Name
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li><a class="dropdown-item" href="@Url.Action("Profile", "Users")"><i class="fas fa-user"></i> Profile</a></li>
+                                        <li>
+                                            <form asp-action="Logout" asp-controller="Users" method="post" class="d-inline">
+                                                <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                            <li class="text-black fw-medium text-capitalize d-flex align-items-center ms-4">
+                                <a asp-controller="Users" asp-action="Login" class="nav-link">Login</a>
+                            </li>
+                            <li class="text-black fw-medium d-flex align-items-center ms-4"> or </li>
+                            <li class="text-black fw-medium text-capitalize d-flex align-items-center ms-4">
+                                <a asp-controller="Users" asp-action="register" class="nav-link">Register</a>
+                            </li>
+                            }
+                        </ul>
+                        @* @if (!User.Identity.IsAuthenticated)
                         {
                             <li class="text-black fw-medium text-capitalize d-flex align-items-center ms-4">
                                 <a asp-controller="Users" asp-action="Login" class="nav-link">Login</a>
@@ -188,7 +216,7 @@
                             <form asp-action="Logout" asp-controller="Users" method="post" id="logoutForm">
                                 <button type="submit" class="btn btn-link text-dark">Log out</button>
                             </form>
-                        }
+                        } *@
                     </ul>
                 </div>
             </div>

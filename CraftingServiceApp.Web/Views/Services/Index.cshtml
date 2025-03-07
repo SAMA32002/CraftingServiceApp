@@ -29,9 +29,10 @@
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card-item">
                         <div class="card border-0 bg-transparent">
-                            <div class="card-image position-relative">
+                            <div class="card-image position-relative" style="width: 250px; height: 250px; overflow: hidden;">
                                 <a href="@Url.Action("Details", "Services", new { id = service.Id })">
-                                    <img src="@service.Image" alt="@service.Title" class="post-image img-fluid">
+                                    <img src="@service.Image" alt="@service.Title" class="img-fluid w-100 h-100" style="object-fit: cover; border-radius: 10px;">
+
                                 </a>
                             </div>
                         </div>

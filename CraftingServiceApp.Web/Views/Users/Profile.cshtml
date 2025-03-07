@@ -1,0 +1,103 @@
+﻿@model CraftingServiceApp.Web.ViewModels.ProfileViewModel
+
+<h2>@Model.User.UserName's Profile</h2>
+<p>Email: @Model.User.Email</p>
+
+@if (Model.IsCrafter)
+{
+    <h3>Your Services</h3>
+    @if (Model.Services.Any())
+    {
+        <ul>
+            @foreach (var service in Model.Services)
+            {
+                <li>
+                    <a asp-controller="Services" asp-action="Details" asp-route-id="@service.Id">
+                        @service.Title
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>You haven't added any services yet.</p>
+    }
+
+    <h3>Requests Received</h3>
+    @if (Model.ReceivedRequests.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model.ReceivedRequests)
+                {
+                    <tr>
+                        <td>@request.Service.Title</td>
+                        <td>@request.Client.UserName</td>
+                        <td>@request.RequestDate.ToShortDateString()</td>
+                        <td>@request.Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No requests received yet.</p>
+    }
+}
+else
+{
+    <h3>Requests Sent</h3>
+    @if (Model.SentRequests.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Crafter</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model.SentRequests)
+                {
+                    <tr>
+                        <td>@request.Service.Title</td>
+                        <td>@request.Service.Crafter.UserName</td>
+                        <td>@request.RequestDate.ToShortDateString()</td>
+                        <td>@request.Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>You haven't sent any requests yet.</p>
+    }
+
+    <h3>Your Posts</h3>
+    @if (Model.Posts.Any())
+    {
+        <ul>
+            @foreach (var post in Model.Posts)
+            {
+                <li>@post.Description (Posted on @post.CreatedAt.ToShortDateString())</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>You haven't posted anything yet.</p>
+    }
+}
