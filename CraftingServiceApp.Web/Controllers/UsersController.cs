@@ -1,11 +1,7 @@
 ﻿using CraftingServiceApp.Domain.Entities;
-using CraftingServiceApp.Domain.Enums;
 using CraftingServiceApp.Web.ViewModels;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;

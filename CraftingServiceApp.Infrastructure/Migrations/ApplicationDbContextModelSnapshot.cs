@@ -57,7 +57,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Address", (string)null);
+                    b.ToTable("Address");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.ApplicationUser", b =>
@@ -159,7 +159,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Comment", b =>
@@ -190,7 +190,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
@@ -207,16 +207,16 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.Property<string>("ClientId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CrafterId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("PaymentDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ServiceId")
+                    b.Property<int>("RequestId")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -224,13 +224,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("CrafterId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
@@ -268,7 +262,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Request", b =>
@@ -294,16 +288,25 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("RequestDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ScheduledDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("SelectedScheduleId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -311,11 +314,41 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("PaymentId");
+                    b.HasIndex("PaymentId")
+                        .IsUnique()
+                        .HasFilter("[PaymentId] IS NOT NULL");
+
+                    b.HasIndex("SelectedScheduleId")
+                        .IsUnique()
+                        .HasFilter("[SelectedScheduleId] IS NOT NULL");
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("Requests", (string)null);
+                    b.ToTable("Requests");
+                });
+
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.RequestSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsSelected")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ProposedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestId");
+
+                    b.ToTable("requestSchedules");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Review", b =>
@@ -346,7 +379,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("Review", (string)null);
+                    b.ToTable("Review");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Service", b =>
@@ -385,7 +418,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("CrafterId");
 
-                    b.ToTable("Services", (string)null);
+                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Ticket", b =>
@@ -416,7 +449,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tickets", (string)null);
+                    b.ToTable("Tickets");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.UserPayment", b =>
@@ -442,6 +475,9 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
@@ -454,11 +490,11 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceId");
+                    b.HasIndex("RequestId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("userPayments", (string)null);
+                    b.ToTable("userPayments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -599,7 +635,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Client")
                         .WithMany("Addresses")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Client");
@@ -635,33 +671,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
-                {
-                    b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Crafter")
-                        .WithMany()
-                        .HasForeignKey("CrafterId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CraftingServiceApp.Domain.Entities.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Crafter");
-
-                    b.Navigation("Service");
-                });
-
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
                 {
                     b.HasOne("CraftingServiceApp.Domain.Entities.Category", "Category")
@@ -671,9 +680,9 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Client")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -694,8 +703,14 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("CraftingServiceApp.Domain.Entities.Payment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId");
+                        .WithOne("Request")
+                        .HasForeignKey("CraftingServiceApp.Domain.Entities.Request", "PaymentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CraftingServiceApp.Domain.Entities.RequestSchedule", "SelectedSchedule")
+                        .WithOne()
+                        .HasForeignKey("CraftingServiceApp.Domain.Entities.Request", "SelectedScheduleId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("CraftingServiceApp.Domain.Entities.Service", "Service")
                         .WithMany("Requests")
@@ -707,7 +722,20 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.Navigation("Payment");
 
+                    b.Navigation("SelectedSchedule");
+
                     b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.RequestSchedule", b =>
+                {
+                    b.HasOne("CraftingServiceApp.Domain.Entities.Request", "Request")
+                        .WithMany("ProposedDates")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Review", b =>
@@ -734,13 +762,13 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.HasOne("CraftingServiceApp.Domain.Entities.Category", "Category")
                         .WithMany("Services")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Crafter")
                         .WithMany("Services")
                         .HasForeignKey("CrafterId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -750,9 +778,9 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.UserPayment", b =>
                 {
-                    b.HasOne("CraftingServiceApp.Domain.Entities.Service", null)
+                    b.HasOne("CraftingServiceApp.Domain.Entities.Request", null)
                         .WithMany()
-                        .HasForeignKey("ServiceId")
+                        .HasForeignKey("RequestId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -818,6 +846,8 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                 {
                     b.Navigation("Addresses");
 
+                    b.Navigation("Posts");
+
                     b.Navigation("ReceivedRequests");
 
                     b.Navigation("SentRequests");
@@ -830,9 +860,20 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("Services");
                 });
 
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
+                {
+                    b.Navigation("Request")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
                 {
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Request", b =>
+                {
+                    b.Navigation("ProposedDates");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Service", b =>

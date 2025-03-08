@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CraftingServiceApp.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace CraftingServiceApp.Domain.Entities
 {
@@ -18,22 +19,25 @@ namespace CraftingServiceApp.Domain.Entities
         public DateTime RequestDate { get; set; } = DateTime.UtcNow;
 
         [Required]
-        [StringLength(50)]
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
+
+        // 🔗 Stores which proposed schedule was selected
+        public int? SelectedScheduleId { get; set; }
+        public RequestSchedule SelectedSchedule { get; set; }
+
+        // 📅 Stores the final confirmed appointment date
+        public DateTime? ScheduledDateTime { get; set; }
 
         [StringLength(500)]
         public string Notes { get; set; }
 
         public int? PaymentId { get; set; }
         public Payment Payment { get; set; }
+
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+
+        public List<RequestSchedule> ProposedDates { get; set; } = new();
     }
 
-    public enum RequestStatus
-    {
-        Pending = 0,
-        Approved = 1,
-        Rejected = 2,
-        Completed = 3
-    }
 
 }
