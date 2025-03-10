@@ -1,4 +1,24 @@
-﻿<!DOCTYPE html>
+﻿@using CraftingServiceApp.Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
+@using CraftingServiceApp.Domain.Entities
+@using CraftingServiceApp.Domain.Enums
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext _context
+
+@{
+    // var userId = UserManager.GetUserId(User);
+    // var unreadRequests = _context.Requests
+    //     .Where(r => r.Service.CrafterId == userId && r.Status == RequestStatus.Pending)
+    //     .Count();
+
+    var userId = UserManager.GetUserId(User);
+    var unreadNotifications = _context.Notifications
+        .Where(n => n.UserId == userId && !n.IsRead)
+        .OrderByDescending(n => n.CreatedAt)
+        .ToList();
+}
+
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -176,13 +196,42 @@
                     <ul class="info d-flex flex-wrap justify-content-end align-items-center list-unstyled m-0">
                             @if (User.Identity.IsAuthenticated)
                             {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-bell"></i>
+                                    @if (unreadNotifications.Count > 0)
+                                    {
+                                        <span class="badge bg-danger">@unreadNotifications.Count</span>
+                                    }
+                                </a>
+                                <ul class="dropdown-menu">
+                                    @if (unreadNotifications.Any())
+                                    {
+                                        @foreach (var notification in unreadNotifications)
+                                        {
+                                            <li><a class="dropdown-item notification-item" data-id="@notification.Id" href="#">@notification.Message</a></li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-center" href="#" id="markAllRead">Mark all as read</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a class="dropdown-item text-muted">No new notifications</a></li>
+                                    }
+                                </ul>
+                            </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-user-circle"></i> @User.Identity.Name
+                                    @* @if (unreadRequests > 0)
+                                    {
+                                        <span class="badge bg-danger">@unreadRequests</span>
+                                    } *@
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                        <li><a class="dropdown-item" href="@Url.Action("Profile", "Users")"><i class="fas fa-user"></i> Profile</a></li>
-                                        <li>
+                                    <li><a class="dropdown-item" asp-controller="Users" asp-action="Profile">Profile</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Request" asp-action="ReceivedRequests">Requests</a></li>
+                                    <li>
                                             <form asp-action="Logout" asp-controller="Users" method="post" class="d-inline">
                                                 <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Logout</button>
                                             </form>
@@ -417,6 +466,21 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper/swiper-bundle.min.js"></script>
     <script type="text/javascript" src="~/ui/js/script.js"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <script>
+        document.getElementById("markAllRead").addEventListener("click", function () {
+            fetch('/Notifications/MarkAllRead', { method: 'POST' })
+                .then(() => location.reload());
+        });
+
+        document.querySelectorAll(".notification-item").forEach(item => {
+            item.addEventListener("click", function () {
+                let notificationId = this.getAttribute("data-id");
+                fetch(`/Notifications/MarkAsRead/${notificationId}`, { method: 'POST' })
+                    .then(() => location.reload());
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false);
 </body>

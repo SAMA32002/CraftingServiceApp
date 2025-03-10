@@ -193,6 +193,35 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -379,7 +408,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Service", b =>
@@ -671,6 +700,17 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("Post");
                 });
 
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
                 {
                     b.HasOne("CraftingServiceApp.Domain.Entities.Category", "Category")
@@ -845,6 +885,8 @@ namespace CraftingServiceApp.Infrastructure.Migrations
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Addresses");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("Posts");
 
