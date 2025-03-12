@@ -408,11 +408,8 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-<<<<<<< HEAD
                     b.ToTable("reviews");
-=======
                     b.ToTable("Reviews");
->>>>>>> f89d542c17e8f83f81a6dd5255595ef2a6ce8604
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Service", b =>
