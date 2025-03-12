@@ -408,7 +408,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.HasIndex("ServiceId");
 
-                    b.ToTable("reviews");
                     b.ToTable("Reviews");
                 });
 
