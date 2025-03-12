@@ -40,8 +40,8 @@
                 @foreach (var request in Model.ReceivedRequests)
                 {
                     <tr>
-                        <td>@request.Service.Title</td>
-                        <td>@request.Client.UserName</td>
+                        <td>@(request.Service?.Title ?? "N/A")</td>
+                        <td>@(request.Client?.UserName ?? "Unknown Client")</td>
                         <td>@request.RequestDate.ToShortDateString()</td>
                         <td>@request.Status</td>
                     </tr>
@@ -72,8 +72,8 @@ else
                 @foreach (var request in Model.SentRequests)
                 {
                     <tr>
-                        <td>@request.Service.Title</td>
-                        <td>@request.Service.Crafter.UserName</td>
+                        <td>@(request.Service?.Title ?? "N/A")</td>
+                        <td>@(request.Service?.Crafter?.UserName ?? "Unknown Crafter")</td>
                         <td>@request.RequestDate.ToShortDateString()</td>
                         <td>@request.Status</td>
                     </tr>

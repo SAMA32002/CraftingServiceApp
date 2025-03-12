@@ -1,0 +1,81 @@
+﻿@model List<CraftingServiceApp.Domain.Entities.Request>
+
+@using CraftingServiceApp.Domain.Enums
+
+<h2>Received Requests</h2>
+
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Date Requested</th>
+                <th>Final Appointment</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td>@request.Client.UserName</td>
+                    <td>@request.Service.Title</td>
+                    <td>@request.RequestDate.ToShortDateString()</td>
+
+                    <!-- Display Final Appointment if set -->
+                    <td>
+                        @if (request.ScheduledDateTime.HasValue)
+                        {
+                            <span class="text-success fw-bold">
+                                @request.ScheduledDateTime.Value.ToShortDateString()
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not scheduled</span>
+                        }
+                    </td>
+
+                    <td>
+                        <span class="badge @(request.Status == RequestStatus.Accepted ? "bg-success" :
+                                            request.Status == RequestStatus.Rejected ? "bg-danger" : "bg-warning")">
+                            @request.Status
+                        </span>
+                    </td>
+
+                    <td>
+                        @if (request.Status == RequestStatus.Pending) // Show buttons only if Pending
+                        {
+                            <form asp-controller="Request" asp-action="AcceptRequest" method="post" class="d-inline">
+                                <input type="hidden" name="requestId" value="@request.Id" />
+                                <select name="selectedScheduleId" required class="form-select form-select-sm d-inline w-auto">
+                                    @foreach (var schedule in request.ProposedDates.Distinct())
+                                    {
+                                        <option value="@schedule.Id">@schedule.ProposedDate.ToShortDateString()</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+
+                            <form asp-controller="Request" asp-action="DeclineRequest" method="post" class="d-inline">
+                                <input type="hidden" name="requestId" value="@request.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Response Given</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No requests received yet.</p>
+}

@@ -30,8 +30,11 @@ namespace CraftingServiceApp.Web.Controllers
             var userId = _userManager.GetUserId(User);
             var user = await _context.Users
                 .Include(u => u.Services) // Crafter's services
-                .Include(u => u.SentRequests) // Client's requests
-                .Include(u => u.ReceivedRequests) // Crafter's received requests
+                .Include(u => u.SentRequests)
+                    .ThenInclude(r => r.Service) // Include Service for sent requests
+                    .ThenInclude(s => s.Crafter) // Include Crafter of the Service
+                .Include(u => u.ReceivedRequests)
+                    .ThenInclude(r => r.Client) // Include Client for received requests
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -41,8 +44,7 @@ namespace CraftingServiceApp.Web.Controllers
 
             // Get user's roles
             var roles = await _userManager.GetRolesAsync(user);
-            bool isCrafter = roles.Contains("Crafter"); // Check if the user has the 'Crafter' role
-
+            bool isCrafter = roles.Contains("Crafter");
 
             var viewModel = new ProfileViewModel
             {
@@ -51,7 +53,7 @@ namespace CraftingServiceApp.Web.Controllers
                 Services = user.Services?.ToList() ?? new List<Service>(),
                 ReceivedRequests = user.ReceivedRequests?.ToList() ?? new List<Request>(),
                 SentRequests = user.SentRequests?.ToList() ?? new List<Request>(),
-                Posts = _context.Posts.Where(p => p.ClientId == userId).ToList() // If posts exist
+                Posts = _context.Posts.Where(p => p.ClientId == userId).ToList()
             };
 
             return View(viewModel);

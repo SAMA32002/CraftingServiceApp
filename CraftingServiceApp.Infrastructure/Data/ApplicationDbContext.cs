@@ -17,9 +17,14 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Address> Address { get; set; }
         public DbSet<UserPayment> userPayments { get; set; }
+        public DbSet<Review> Reviews { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestSchedule> requestSchedules { get; set; }
+<<<<<<< HEAD
         public DbSet<Review>  reviews { get; set; }
+=======
+        public DbSet<Notification> Notifications { get; set; }
+>>>>>>> f89d542c17e8f83f81a6dd5255595ef2a6ce8604
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -163,6 +168,12 @@ namespace CraftingServiceApp.Infrastructure.Data
                 .WithMany(r => r.ProposedDates)
                 .HasForeignKey(rs => rs.RequestId)
                 .OnDelete(DeleteBehavior.Cascade); // Automatically remove schedules when the request is deleted
+
+            builder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

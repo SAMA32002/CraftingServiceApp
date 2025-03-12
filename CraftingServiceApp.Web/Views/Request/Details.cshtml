@@ -1,0 +1,20 @@
+﻿@model CraftingServiceApp.Web.ViewModels.RequestDetailsViewModel
+
+<div class="container mt-4">
+    <h2>Request Details</h2>
+
+    <p><strong>Service:</strong> @Model.ServiceTitle</p>
+    <p><strong>Status:</strong> @Model.Status</p>
+    <p><strong>Request Date:</strong> @Model.RequestDate.ToString("f")</p>
+
+    <h3>Proposed Dates</h3>
+    <ul>
+        @foreach (var date in Model.ProposedDates)
+        {
+            <li>@date.ToString("f")</li>
+        }
+    </ul>
+
+    <h3>Notes</h3>
+    <p>@(string.IsNullOrEmpty(Model.Notes) ? "No additional notes." : Model.Notes)</p>
+</div>

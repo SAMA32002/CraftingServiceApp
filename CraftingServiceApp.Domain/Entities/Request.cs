@@ -38,6 +38,4 @@ namespace CraftingServiceApp.Domain.Entities
 
         public List<RequestSchedule> ProposedDates { get; set; } = new();
     }
-
-
 }
