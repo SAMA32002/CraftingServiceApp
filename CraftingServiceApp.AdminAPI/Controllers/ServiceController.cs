@@ -1,4 +1,5 @@
-﻿using CraftingServiceApp.Domain.Entities;
+﻿using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace CraftingServiceApp.AdminAPI.Controllers
 
             if (service.Reviews != null && service.Reviews.Any())
             {
-                _context.Reviews.RemoveRange(service.Reviews);
+                _context.reviews.RemoveRange(service.Reviews);
             }
 
             _serviceRepository.Delete(service);

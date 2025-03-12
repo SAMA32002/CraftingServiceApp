@@ -19,6 +19,7 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<UserPayment> userPayments { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestSchedule> requestSchedules { get; set; }
+        public DbSet<Review>  reviews { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

@@ -33,14 +33,14 @@ namespace CraftingServiceApp.AdminAPI.Controllers
             var userPosts = _context.Posts.Where(p => p.ClientId == user.Id);
             _context.Posts.RemoveRange(userPosts);
 
-            var userRequests = _context.Requests.Where(r => r.ClientId == user.Id || r.CrafterId == user.Id);
+            var userRequests = _context.Requests.Where(r => r.ClientId == user.Id );
             _context.Requests.RemoveRange(userRequests);
 
-            var userServices = _context.Services.Where(s => s.UserId == user.Id);
+            var userServices = _context.Services.Where(s => s.CrafterId == user.Id);
             _context.Services.RemoveRange(userServices);
 
-            var userAddresses = _context.Addresses.Where(a => a.UserId == user.Id);
-            _context.Addresses.RemoveRange(userAddresses);
+            var userAddresses = _context.Address.Where(a => a.ClientId == user.Id);
+            _context.Address.RemoveRange(userAddresses);
 
             var result = await _userManager.DeleteAsync(user);
 
