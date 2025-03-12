@@ -41,6 +41,17 @@
                                 <label for="Price" class="form-label">Price (EGP)</label>
                                 <input type="number" class="form-control" id="Price" name="Price" required />
                             </div>
+                            <!-- Category Dropdown -->
+                            <div class="mb-3">
+                                <label for="CategoryId" class="form-label">Category</label>
+                                <select class="form-select" id="CategoryId" name="CategoryId" required>
+                                    <option value="">-- Select Category --</option>
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Value">@category.Text</option>
+                                    }
+                                </select>
+                            </div>
                             <div class="mb-3">
                                 <label for="Image" class="form-label">Image</label>
                                 <input type="file" class="form-control" id="Image" name="Image" onchange="previewImage(event)" required />
