@@ -55,78 +55,78 @@ namespace CraftingServiceApp.AdminAPI.Controllers
         }
 
 
-            [HttpPut("BanUser/{id}")]
-            public async Task<IActionResult> BanUser(string id)
+        [HttpPut("BanUser/{id}")]
+        public async Task<IActionResult> BanUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-                if (user == null)
-                {
-                    return NotFound(new { Message = "User not found" });
-                }
-
-                user.IsBanned = true;
-
-                var result = await _userManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return Ok(new { Message = "User has been banned successfully." });
-                }
-
-                return BadRequest(new { Message = "Error occurred while banning the user", Errors = result.Errors });
+                return NotFound(new { Message = "User not found" });
             }
 
-            [HttpPut("UnbanUser/{id}")]
-            public async Task<IActionResult> UnbanUser(string id)
+            user.IsBanned = true;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
             {
-                var user = await _userManager.FindByIdAsync(id);
-                if (user == null)
-                {
-                    return NotFound(new { Message = "User not found" });
-                }
-
-                user.IsBanned = false;
-
-                var result = await _userManager.UpdateAsync(user);
-
-                if (result.Succeeded)
-                {
-                    return Ok(new { Message = "User has been unbanned successfully." });
-                }
-
-                return BadRequest(new { Message = "Error occurred while unbanning the user", Errors = result.Errors });
+                return Ok(new { Message = "User has been banned successfully." });
             }
 
-            [HttpPut("UpdateUserRole/{id}")]
-            public async Task<IActionResult> UpdateUserRole(string id, [FromBody] string newRole)
+            return BadRequest(new { Message = "Error occurred while banning the user", Errors = result.Errors });
+        }
+
+        [HttpPut("UnbanUser/{id}")]
+        public async Task<IActionResult> UnbanUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(id);
-                if (user == null)
-                {
-                    return NotFound(new { Message = "User not found" });
-                }
-
-                var roleExists = await _roleManager.RoleExistsAsync(newRole);
-                if (!roleExists)
-                {
-                    return BadRequest(new { Message = $"Role '{newRole}' does not exist" });
-                }
-
-                var currentRoles = await _userManager.GetRolesAsync(user);
-                var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                if (!removeResult.Succeeded)
-                {
-                    return BadRequest(new { Message = "Error occurred while removing the user from their current roles" });
-                }
-
-                var addResult = await _userManager.AddToRoleAsync(user, newRole);
-                if (!addResult.Succeeded)
-                {
-                    return BadRequest(new { Message = "Error occurred while adding the user to the new role", Errors = addResult.Errors });
-                }
-
-                return Ok(new { Message = $"User role updated to {newRole}" });
+                return NotFound(new { Message = "User not found" });
             }
+
+            user.IsBanned = false;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "User has been unbanned successfully." });
+            }
+
+            return BadRequest(new { Message = "Error occurred while unbanning the user", Errors = result.Errors });
+        }
+
+        [HttpPut("UpdateUserRole/{id}")]
+        public async Task<IActionResult> UpdateUserRole(string id, [FromBody] string newRole)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found" });
+            }
+
+            var roleExists = await _roleManager.RoleExistsAsync(newRole);
+            if (!roleExists)
+            {
+                return BadRequest(new { Message = $"Role '{newRole}' does not exist" });
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                return BadRequest(new { Message = "Error occurred while removing the user from their current roles" });
+            }
+
+            var addResult = await _userManager.AddToRoleAsync(user, newRole);
+            if (!addResult.Succeeded)
+            {
+                return BadRequest(new { Message = "Error occurred while adding the user to the new role", Errors = addResult.Errors });
+            }
+
+            return Ok(new { Message = $"User role updated to {newRole}" });
+        }
 
 }
 }
