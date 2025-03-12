@@ -1,4 +1,5 @@
 ﻿using CraftingServiceApp.AdminAPI.Extentions;
+using CraftingServiceApp.AdminAPI.Helpers;
 using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.BLL.Interfaces;
 using CraftingServiceApp.Domain.Entities;
@@ -22,7 +23,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddSwaggerService(); 
+builder.Services.AddSwaggerService();
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+builder.Services.AddTransient<EmailService>();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IReviewService, ReviewService>();

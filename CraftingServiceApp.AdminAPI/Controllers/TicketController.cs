@@ -1,17 +1,52 @@
 ﻿using CraftingServiceApp.AdminAPI.Dtos;
 using CraftingServiceApp.AdminAPI.Helpers;
 using CraftingServiceApp.AdminAPI.Interfaces;
+using CraftingServiceApp.Domain.Entities;
+using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 public class TicketController : ControllerBase
 {
     private readonly ITicketService _ticketService;
     private readonly ILogger<TicketController> _logger;
+    private readonly EmailService _emailService;
+    private readonly ApplicationDbContext _context;
 
-    public TicketController(ITicketService ticketService, ILogger<TicketController> logger)
+    public TicketController(ITicketService ticketService, ILogger<TicketController> logger , EmailService emailService , ApplicationDbContext context)
     {
         _ticketService = ticketService;
         _logger = logger;
+        _emailService = emailService;
+        _context = context;
+
+    }
+
+    [HttpPost("resolve/{ticketId}")]
+    public async Task<IActionResult> ResolveTicket(int ticketId)
+    {
+        var ticket = await _context.Tickets.FindAsync(ticketId);
+        if (ticket == null)
+        {
+            return NotFound(new { error = "Ticket not found" });
+        }
+
+        ticket.Status = TicketStatus.Resolved;
+
+        await _context.SaveChangesAsync();
+
+        var success = await _emailService.SendEmailAsync(
+            ticket.Email,
+            "Your Ticket Has Been Resolved!",
+            "<h2>Hello,</h2><p>We want to inform you that your ticket has been successfully resolved ✅.</p>"
+        );
+
+        if (success)
+        {
+            return Ok(new { message = "Ticket resolved and email sent." });
+        }
+
+        return BadRequest(new { error = "Ticket resolved but email failed to send." });
     }
 
     [HttpGet]
