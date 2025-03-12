@@ -54,7 +54,6 @@ namespace CraftingServiceApp.AdminAPI.Controllers
             return BadRequest(new { Message = "Error occurred while deleting the user", Errors = result.Errors });
         }
 
-
         [HttpPut("BanUser/{id}")]
         public async Task<IActionResult> BanUser(string id)
         {
