@@ -1,0 +1,75 @@
+﻿@model CraftingServiceApp.Domain.Entities.Service
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Edit Service</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CrafterId" />
+                <input type="hidden" asp-for="Image" />
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Title</label>
+                            <input asp-for="Title" class="form-control" required />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="5" required></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label">Price (EGP)</label>
+                            <input asp-for="Price" class="form-control" type="number" step="0.01" required />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Category</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId" required>
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="ImageFile" class="form-label">Service Image</label>
+                            <input type="file" id="ImageFile" name="ImageFile" class="form-control" onchange="previewImage(event)" />
+                            <small class="text-muted">Leave empty to keep current image</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Current Image</label>
+                            <div class="mb-2">
+                                <img src="@Model.Image" alt="Current Image" class="img-thumbnail" style="max-height: 200px" />
+                            </div>
+                            <div>
+                                <img id="previewImg" src="#" alt="Preview" class="img-thumbnail d-none" style="max-height: 200px" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

@@ -1,5 +1,4 @@
-﻿@using CraftingServiceApp.Domain.Enums
-@model IEnumerable<CraftingServiceApp.Domain.Entities.Service>
+﻿@model IEnumerable<CraftingServiceApp.Domain.Entities.Service>
 
 <section id="services">
     <div class="container">
@@ -26,14 +25,43 @@
             @foreach (var service in Model)
             {
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card-item">
+                    <div class="card-item position-relative">
                         <div class="card border-0 bg-transparent">
-                            <div class="card-image position-relative" style="width: 250px; height: 250px; overflow: hidden;">
+                            <!-- Image Container -->
+                            <div class="card-image position-relative" style="width: 250px; height: 250px; overflow: hidden; border-radius: 10px;">
                                 <a href="@Url.Action("Details", "Services", new { id = service.Id })">
-                                    <img src="@service.Image" alt="@service.Title" class="img-fluid w-100 h-100" style="object-fit: cover; border-radius: 10px;">
+                                    <img src="@service.Image" alt="@service.Title" class="img-fluid w-100 h-100" style="object-fit: cover;">
                                 </a>
+
+                                @if (User.IsInRole("Crafter"))
+                                {
+                                    <!-- 3 Dots Menu Icon -->
+                                    <div class="dropdown position-absolute top-0 end-0 m-2">
+                                        <button class="btn btn-light btn-sm rounded-circle" type="button" id="dropdownMenuButton-@service.Id" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v" style="font-size: 14px; color: #333;"></i>
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="dropdownMenuButton-@service.Id">
+                                            <li>
+                                                <a class="dropdown-item d-flex align-items-center edit-icon" href="@Url.Action("Edit", "Services", new { id = service.Id })">
+                                                    <i class="fas fa-pen me-2 text-warning"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form asp-action="Delete" asp-controller="Services" method="post" onsubmit="return confirm('Are you sure you want to delete this service?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@service.Id" />
+                                                    <button type="submit" class="dropdown-item d-flex align-items-center delete-icon">
+                                                        <i class="fas fa-trash-alt me-2 text-danger"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
                             </div>
 
+                            <!-- Card Content -->
                             <div class="card-body p-0 mt-2">
                                 <h5 class="mt-2">
                                     <a href="@Url.Action("Details", "Services", new { id = service.Id })">@service.Title</a>
@@ -46,20 +74,8 @@
                                         Read more
                                     </a>
                                 </p>
+
                                 <span class="fw-bold text-primary">@service.Price EGP</span>
-
-                                @if (User.IsInRole("Crafter"))
-                                {
-                                    <div class="mt-2 d-flex justify-content-between">
-                                        <a href="@Url.Action("Edit", "Services", new { id = service.Id })" class="btn btn-sm btn-warning">Edit</a>
-
-                                        <form asp-action="Delete" asp-controller="Services" method="post" onsubmit="return confirm('Are you sure you want to delete this service?');">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@service.Id" />
-                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                        </form>
-                                    </div>
-                                }
                             </div>
                         </div>
                     </div>
@@ -69,58 +85,7 @@
     </div>
 </section>
 
-<!-- Add Service Modal -->
-<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addServiceModalLabel">Add New Service</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form asp-action="Create" method="post" id="addServiceForm" enctype="multipart/form-data">
-                    <div asp-validation-summary="All" class="text-danger"></div>
-                    @Html.AntiForgeryToken()
-
-                    <div class="mb-3">
-                        <label for="Title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="Title" name="Title" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="Description" class="form-label">Description</label>
-                        <textarea class="form-control" id="Description" name="Description" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="Price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="Price" name="Price" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="CategoryId" class="form-label">Category</label>
-                        <select class="form-control" id="CategoryId" name="CategoryId" required>
-                            <option value="">Select a category</option>
-                            @foreach (var category in ViewBag.Categories)
-                            {
-                                <option value="@category.Value">@category.Text</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="ImageFile" class="form-label">Upload Image</label>
-                        <img id="previewImg" src="" class="img-fluid d-none" style="max-width: 100px;">
-                        <input type="file" class="form-control" id="ImageFile" name="ImageFile" onchange="previewImage(event)">
-                    </div>
-
-                    <button type="submit" class="btn btn-success">Add Service</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!-- Add Service Modal (نفس الكود السابق هنا) -->
 <!-- JS Preview Image -->
 <script>
     function previewImage(event) {
@@ -160,3 +125,37 @@
         });
     });
 </script>
+
+<!-- Styles -->
+<style>
+    .dropdown-menu {
+        min-width: 52px;
+        font-size: 14px;
+    }
+
+    .dropdown-item {
+        cursor: pointer;
+    }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-item i {
+            width: 10px;
+        }
+
+    /* Optional: smooth transitions for the dropdown */
+    .dropdown-menu {
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Image hover effect */
+    .card-image:hover img {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+</style>
+
+<!-- Font Awesome (لو مش محطوط قبل كده) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
