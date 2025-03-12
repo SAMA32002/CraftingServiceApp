@@ -34,7 +34,7 @@ namespace CraftingServiceApp.AdminAPI.Controllers
 
             if (service.Reviews != null && service.Reviews.Any())
             {
-                _context.reviews.RemoveRange(service.Reviews);
+                _context.Reviews.RemoveRange(service.Reviews);
             }
 
             _serviceRepository.Delete(service);

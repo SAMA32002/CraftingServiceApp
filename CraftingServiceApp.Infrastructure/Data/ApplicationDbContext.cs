@@ -20,7 +20,6 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestSchedule> requestSchedules { get; set; }
-        public DbSet<Review>  reviews { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
