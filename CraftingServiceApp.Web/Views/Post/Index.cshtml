@@ -1,55 +1,82 @@
-﻿@model IEnumerable<CraftingServiceApp.Domain.Entities.Post>
+﻿@@model IEnumerable<CraftingServiceApp.Domain.Entities.Post>
 
-<section id="services">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            @if (User.IsInRole("Client"))
-            {
+    <section id="services">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                @if (User.IsInRole("Client"))
+                {
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPostModal">
+                        Add Post
+                    </button>
+                }
+            </div>
 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPostModal">
-                    Add Post
-            </button>
-            }
-        </div>
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Index", "Post")" class="btn btn-outline-primary">All</a>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <a href="@Url.Action("Index", "Post", new { categoryId = category.Value })" class="btn btn-outline-primary">@category.Text</a>
+                }
+            </div>
 
-        <div class="btn-group" role="group">
-            <a href="@Url.Action("Index", "Post")" class="btn btn-outline-primary">All</a>
-            @foreach (var category in ViewBag.Categories)
-            {
-                <a href="@Url.Action("Index", "Post", new { categoryId = category.Value })" class="btn btn-outline-primary">@category.Text</a>
-            }
+            <div class="row mt-5">
+                @foreach (var post in Model)
+                {
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card-item position-relative">
+                            <div class="card border-0 bg-transparent">
+                                <div class="card-image position-relative">
+                                    <a href="@Url.Action("Details", "Post", new { id = post.Id })">
+                                        <img src="~/ui/images/post_request.png" alt="@post.Title" class="post-image img-fluid">
+                                    </a>
 
-        </div>
+                                    <!-- Start: Dropdown menu (3 dots) -->
+                                    @if (User.IsInRole("Client"))
+                                    {
+                                        <div class="dropdown position-absolute top-0 end-0 m-2">
+                                            <button class="btn btn-sm btn-light rounded-circle" type="button" id="dropdownMenuButton-@post.Id" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-@post.Id">
+                                                <li>
+                                                    <a class="dropdown-item" href="@Url.Action("Edit", "Post", new { id = post.Id })">
+                                                        <i class="bi bi-pencil text-warning"></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <form asp-action="Delete" asp-route-id="@post.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
 
-        <div class="row mt-5">
-            @foreach (var post in Model)
-            {
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card-item">
-                        <div class="card border-0 bg-transparent">
-                            <div class="card-image position-relative">
-                                <a href="@Url.Action("Details", "Post", new { id = post.Id })">
-                                    <img src="~/ui/images/post_request.png" alt="@post.Title" class="post-image img-fluid">
-                                </a>
+                                    }
+                                    <!-- End: Dropdown menu -->
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 mt-2">
+                                <h5 class="mt-2">
+                                    <a href="@Url.Action("Details", "Post", new { id = post.Id })">@post.Title</a>
+                                </h5>
+                                <p>
+                                    @post.Description.Substring(0, Math.Min(post.Description.Length, 100))...
+                                    <a href="@Url.Action("Details", "Post", new { id = post.Id })" class="text-decoration-underline fst-italic">
+                                        Read more
+                                    </a>
+                                </p>
                             </div>
                         </div>
-                        <div class="card-body p-0 mt-2">
-                            <h5 class="mt-2">
-                                <a href="@Url.Action("Details", "Post", new { id = post.Id })">@post.Title</a>
-                            </h5>
-                            <p>
-                                @post.Description.Substring(0, Math.Min(post.Description.Length, 100))...
-                                <a href="@Url.Action("Details", "Post", new { id = post.Id })" class="text-decoration-underline fst-italic">
-                                    Read more
-                                </a>
-                            </p>
-                        </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+
 
 <div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="addPostModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -70,7 +97,7 @@
                         <label for="Description" class="form-label">Description</label>
                         <textarea class="form-control" id="Description" name="Description" required></textarea>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="CategoryId" class="form-label">Category</label>
                         <select class="form-control" id="CategoryId" name="CategoryId" required>
@@ -87,8 +114,6 @@
         </div>
     </div>
 </div>
-
-
 
 <script>
     $(document).ready(function () {
@@ -115,3 +140,4 @@
         });
     });
 </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
