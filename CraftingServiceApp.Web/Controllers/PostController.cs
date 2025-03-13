@@ -33,12 +33,15 @@ namespace CraftingServiceApp.Web.Controllers
         public async Task<IActionResult> Index(int? categoryId)
         {
             var posts = await _PostRepository.GetAllAsync();
+
+            // إرسال كل الكاتيجوريز للـ ViewData
             ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
             if (categoryId.HasValue)
             {
                 posts = _PostsService.GetPostsByCategory(categoryId.Value);
             }
+
             return View(posts);
         }
 
@@ -46,9 +49,11 @@ namespace CraftingServiceApp.Web.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var post = await _PostRepository.GetByIdAsync(id);
-            ViewData["CategoryId"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
             if (post == null) return NotFound();
+
+            // إرسال كل الكاتيجوريز للـ ViewData
+            ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
             return View(post);
         }
@@ -56,7 +61,9 @@ namespace CraftingServiceApp.Web.Controllers
         // GET: Post/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name"); 
+            // إرسال كل الكاتيجوريز للـ ViewData
+            ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
+
             return View();
         }
 
@@ -72,20 +79,26 @@ namespace CraftingServiceApp.Web.Controllers
             TryValidateModel(post);
 
             if (ModelState.IsValid)
-            {                
+            {
                 _PostRepository.Add(post);
                 await _PostRepository.SaveAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // إعادة تحميل الكاتيجوريز في حالة فشل التحقق من صحة الموديل
+            ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name", post.CategoryId);
+
             return View(post);
         }
 
         // GET: Post/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-
             var post = await _PostRepository.GetByIdAsync(id);
             if (post == null) return NotFound();
+
+            // إرسال كل الكاتيجوريز للـ ViewData مع تحديد العنصر المختار
+            ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name", post.CategoryId);
 
             return View(post);
         }
@@ -103,21 +116,24 @@ namespace CraftingServiceApp.Web.Controllers
                 {
                     _PostRepository.Update(post);
                     await _PostRepository.SaveAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
+                    // تقدر تضيف لوج هنا لو حبيت
                     throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
+
+            // إعادة تحميل الكاتيجوريز في حالة فشل التحقق من صحة الموديل
+            ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name", post.CategoryId);
+
             return View(post);
         }
 
         // GET: Post/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            if (id == null) return NotFound();
-
             var post = await _PostRepository.GetByIdAsync(id);
 
             if (post == null) return NotFound();
