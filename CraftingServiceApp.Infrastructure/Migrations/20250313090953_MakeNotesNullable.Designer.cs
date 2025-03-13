@@ -4,6 +4,7 @@ using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CraftingServiceApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250313090953_MakeNotesNullable")]
+    partial class MakeNotesNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -309,18 +312,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CustomCity")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomCountry")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomPostalCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomStreet")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -337,9 +328,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.Property<DateTime?>("ScheduledDateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("SelectedAddressId")
-                        .HasColumnType("int");
 
                     b.Property<int?>("SelectedScheduleId")
                         .HasColumnType("int");
@@ -360,8 +348,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.HasIndex("PaymentId")
                         .IsUnique()
                         .HasFilter("[PaymentId] IS NOT NULL");
-
-                    b.HasIndex("SelectedAddressId");
 
                     b.HasIndex("SelectedScheduleId")
                         .IsUnique()
@@ -680,7 +666,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Client")
                         .WithMany("Addresses")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Client");
@@ -763,11 +749,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .HasForeignKey("CraftingServiceApp.Domain.Entities.Request", "PaymentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("CraftingServiceApp.Domain.Entities.Address", "SelectedAddress")
-                        .WithMany()
-                        .HasForeignKey("SelectedAddressId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("CraftingServiceApp.Domain.Entities.RequestSchedule", "SelectedSchedule")
                         .WithOne()
                         .HasForeignKey("CraftingServiceApp.Domain.Entities.Request", "SelectedScheduleId")
@@ -782,8 +763,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("Client");
 
                     b.Navigation("Payment");
-
-                    b.Navigation("SelectedAddress");
 
                     b.Navigation("SelectedSchedule");
 

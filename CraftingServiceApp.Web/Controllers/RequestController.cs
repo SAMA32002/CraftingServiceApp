@@ -30,14 +30,27 @@ namespace CraftingServiceApp.Web.Controllers
                 return NotFound();
             }
 
+            var client = await _userManager.GetUserAsync(User);
+            if (client == null)
+            {
+                return Unauthorized();
+            }
+
+            // Load client's saved addresses
+            var clientAddresses = await _context.Address
+                .Where(a => a.ClientId == client.Id)
+                .ToListAsync();
+
             var viewModel = new RequestCreateViewModel
             {
                 ServiceId = serviceId,
-                ServiceTitle = service.Title
+                ServiceTitle = service.Title,
+                ClientAddresses = clientAddresses
             };
 
             return View(viewModel);
         }
+
 
         // POST: Request/Create
         [HttpPost]
@@ -50,14 +63,45 @@ namespace CraftingServiceApp.Web.Controllers
                 return Unauthorized();
             }
 
+            int? selectedAddressId = model.SelectedAddressId;
+
+            // If the client chose to enter a new address, save it first
+            if (!model.UseExistingAddress)
+            {
+                if (!string.IsNullOrWhiteSpace(model.NewStreet) && !string.IsNullOrWhiteSpace(model.NewCity))
+                {
+                    var newAddress = new Address
+                    {
+                        ClientId = client.Id,
+                        Street = model.NewStreet,
+                        City = model.NewCity,
+                        PostalCode = model.NewPostalCode,
+                        Country = model.NewCountry,
+                        IsPrimary = false
+                    };
+
+                    _context.Address.Add(newAddress);
+                    await _context.SaveChangesAsync();
+                    selectedAddressId = newAddress.Id; // Use the new address for the request
+                }
+            }
+
             var request = new Request
             {
                 ClientId = client.Id,
                 ServiceId = model.ServiceId,
                 Status = RequestStatus.Pending,
                 RequestDate = DateTime.UtcNow,
-                Notes = model.Notes
+                Notes = model.Notes,
+                SelectedAddressId = selectedAddressId, // Assign selected address
+
+                // Assign custom address fields
+                CustomStreet = !model.UseExistingAddress ? model.NewStreet : null,
+                CustomCity = !model.UseExistingAddress ? model.NewCity : null,
+                CustomPostalCode = !model.UseExistingAddress ? model.NewPostalCode : null,
+                CustomCountry = !model.UseExistingAddress ? model.NewCountry : null
             };
+
 
             _context.Requests.Add(request);
             await _context.SaveChangesAsync();
@@ -81,21 +125,15 @@ namespace CraftingServiceApp.Web.Controllers
             {
                 _context.requestSchedules.AddRange(schedules);
                 await _context.SaveChangesAsync();
-                Console.WriteLine("DEBUG: RequestSchedules added successfully.");
-            }
-            else
-            {
-                Console.WriteLine("⚠️ WARNING: No schedules were added!");
             }
 
-            // 📢 **Send Notification to Crafter** 📢
+            // Send Notification to Crafter
             var service = await _context.Services.FindAsync(model.ServiceId);
             if (service != null)
             {
-                var crafterId = service.CrafterId; // Assuming Service has CrafterId
                 var notification = new Notification
                 {
-                    UserId = crafterId,
+                    UserId = service.CrafterId,
                     Message = $"You have received a new request from {client.UserName}.",
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
@@ -107,6 +145,7 @@ namespace CraftingServiceApp.Web.Controllers
 
             return RedirectToAction("Details", "Request", new { id = request.Id });
         }
+
 
         public async Task<IActionResult> Details(int id)
         {
@@ -132,6 +171,7 @@ namespace CraftingServiceApp.Web.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Roles = "Crafter")]
         public async Task<IActionResult> ReceivedRequests()
         {
             var userId = _userManager.GetUserId(User);

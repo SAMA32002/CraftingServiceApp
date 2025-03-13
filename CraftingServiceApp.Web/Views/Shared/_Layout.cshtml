@@ -6,11 +6,6 @@
 @inject ApplicationDbContext _context
 
 @{
-    // var userId = UserManager.GetUserId(User);
-    // var unreadRequests = _context.Requests
-    //     .Where(r => r.Service.CrafterId == userId && r.Status == RequestStatus.Pending)
-    //     .Count();
-
     var userId = UserManager.GetUserId(User);
     var unreadNotifications = _context.Notifications
         .Where(n => n.UserId == userId && !n.IsRead)
@@ -209,8 +204,22 @@
                                     {
                                         @foreach (var notification in unreadNotifications)
                                         {
-                                            <li><a class="dropdown-item notification-item" data-id="@notification.Id" href="#">@notification.Message</a></li>
+                                            @if (User.IsInRole("Crafter"))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item notification-item" data-id="@notification.Id"
+                                                       href="@Url.Action("ReceivedRequests", "Request")">@notification.Message</a>
+                                                </li>
+                                            }
+                                            else if (User.IsInRole("Client"))
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item notification-item" data-id="@notification.Id"
+                                                       href="@Url.Action("SentRequests", "Request")">@notification.Message</a>
+                                                </li>
+                                            }
                                         }
+
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item text-center" href="#" id="markAllRead">Mark all as read</a></li>
                                     }
@@ -223,14 +232,17 @@
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-user-circle"></i> @User.Identity.Name
-                                    @* @if (unreadRequests > 0)
-                                    {
-                                        <span class="badge bg-danger">@unreadRequests</span>
-                                    } *@
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item" asp-controller="Users" asp-action="Profile">Profile</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Request" asp-action="ReceivedRequests">Requests</a></li>
+                                    @if (User.IsInRole("Crafter"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Request" asp-action="ReceivedRequests">Received Requests</a></li>
+                                    }
+                                    else if (User.IsInRole("Client"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Request" asp-action="SentRequests">Sent Requests</a></li>
+                                    }
                                     <li>
                                             <form asp-action="Logout" asp-controller="Users" method="post" class="d-inline">
                                                 <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -250,23 +262,6 @@
                             </li>
                             }
                         </ul>
-                        @* @if (!User.Identity.IsAuthenticated)
-                        {
-                            <li class="text-black fw-medium text-capitalize d-flex align-items-center ms-4">
-                                <a asp-controller="Users" asp-action="Login" class="nav-link">Login</a>
-                            </li>
-                            <li class="text-black fw-medium d-flex align-items-center ms-4"> or </li>
-                            <li class="text-black fw-medium text-capitalize d-flex align-items-center ms-4">
-                                <a asp-controller="Users" asp-action="register" class="nav-link">Register</a>
-                            </li>
-                        }
-                        else @if (User.Identity.IsAuthenticated)
-                        {
-                            <form asp-action="Logout" asp-controller="Users" method="post" id="logoutForm">
-                                <button type="submit" class="btn btn-link text-dark">Log out</button>
-                            </form>
-                        } *@
-                    </ul>
                 </div>
             </div>
         </nav>

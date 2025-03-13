@@ -29,7 +29,7 @@ namespace CraftingServiceApp.Domain.Entities
         public DateTime? ScheduledDateTime { get; set; }
 
         [StringLength(500)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
 
         public int? PaymentId { get; set; }
         public Payment Payment { get; set; }
@@ -37,5 +37,14 @@ namespace CraftingServiceApp.Domain.Entities
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 
         public List<RequestSchedule> ProposedDates { get; set; } = new();
+
+        // ✅ New Fields for Address Selection
+        public int? SelectedAddressId { get; set; } // If they use a saved address
+        public Address SelectedAddress { get; set; } // Navigation property
+
+        public string? CustomStreet { get; set; } // If they enter a new address
+        public string? CustomCity { get; set; }
+        public string? CustomPostalCode { get; set; }
+        public string? CustomCountry { get; set; }
     }
 }

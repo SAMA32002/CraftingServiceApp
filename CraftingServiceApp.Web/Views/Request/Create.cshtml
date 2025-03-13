@@ -6,6 +6,51 @@
     <form asp-action="Create" method="post">
         <input type="hidden" asp-for="ServiceId" />
 
+        <!-- Address Selection -->
+        <div class="form-group">
+            <label>Where do you want to receive the service?</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" asp-for="UseExistingAddress" value="true" checked />
+                <label class="form-check-label">Use my saved address</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" asp-for="UseExistingAddress" value="false" />
+                <label class="form-check-label">Enter a new address</label>
+            </div>
+        </div>
+
+        <!-- Existing Address Dropdown -->
+        <div id="existingAddressSection" class="form-group">
+            <label for="SelectedAddressId">Select an Address:</label>
+            <select asp-for="SelectedAddressId" class="form-control">
+                @foreach (var address in Model.ClientAddresses)
+                {
+                    <option value="@address.Id">@($"{address.Street}, {address.City}, {address.Country}")</option>
+                }
+            </select>
+        </div>
+
+        <!-- New Address Fields -->
+        <div id="newAddressSection" class="d-none">
+            <div class="form-group">
+                <label>Street:</label>
+                <input type="text" asp-for="NewStreet" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>City:</label>
+                <input type="text" asp-for="NewCity" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Postal Code:</label>
+                <input type="text" asp-for="NewPostalCode" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Country:</label>
+                <input type="text" asp-for="NewCountry" class="form-control" />
+            </div>
+        </div>
+
+        <!-- Proposed Dates -->
         <div class="form-group">
             <label>Proposed Schedule 1:</label>
             <input type="datetime-local" asp-for="ProposedDate1" class="form-control" required />
@@ -29,3 +74,18 @@
         <button type="submit" class="btn btn-primary">Submit Request</button>
     </form>
 </div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll('input[name="UseExistingAddress"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const useExisting = this.value === "true"; // Convert string to boolean comparison
+                document.getElementById('existingAddressSection').classList.toggle('d-none', !useExisting);
+                document.getElementById('newAddressSection').classList.toggle('d-none', useExisting);
+            });
+        });
+    </script>
+}
+

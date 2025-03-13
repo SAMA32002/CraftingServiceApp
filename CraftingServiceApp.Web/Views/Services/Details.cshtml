@@ -16,7 +16,7 @@
                 }
                 (@Model.AverageRating.ToString("0.0"))
             </span>
-            <p><strong>Price:</strong>@Model.Service.Price EGP</p>
+            <p><strong>Price:</strong>@Model.Service.Price.ToString("F2") EGP</p>
             <p><strong>Crafter:</strong> @(Model.Service.Crafter?.UserName ?? "Unknown Crafter")</p>
             <p><strong>Category:</strong> @(Model.Service.Category?.Name ?? "Uncategorized")</p>
             <p><strong>Description:</strong> @Model.Service.Description</p>
