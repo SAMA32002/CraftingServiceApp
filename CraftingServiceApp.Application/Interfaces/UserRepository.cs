@@ -18,9 +18,9 @@ namespace CraftingServiceApp.Application.Interfaces
             return _context.Users.Find(id);
         }
 
-        public IEnumerable<ApplicationUser> GetAll()
+        public IQueryable<ApplicationUser> GetAll()
         {
-            return _context.Users.ToList();
+            return _context.Users;
         }
 
         public void Add(ApplicationUser user)
@@ -43,9 +43,9 @@ namespace CraftingServiceApp.Application.Interfaces
             _context.SaveChanges();
         }
 
-        public IEnumerable<ApplicationUser> Find(Expression<Func<ApplicationUser, bool>> predicate)
+        public IQueryable<ApplicationUser> Find(Expression<Func<ApplicationUser, bool>> predicate)
         {
-            return _context.Users.Where(predicate).ToList();
+            return _context.Users.Where(predicate);
         }
 
     }

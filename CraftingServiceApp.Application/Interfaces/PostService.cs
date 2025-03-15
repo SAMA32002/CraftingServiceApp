@@ -12,12 +12,12 @@ namespace CraftingServiceApp.BLL.Interfaces
             _postRepository = postRepository;
         }
 
-        public IEnumerable<Post> GetPostsByCategory(int categoryId)
+        public IQueryable<Post> GetPostsByCategory(int categoryId)
         {
             return _postRepository.Find(s => s.CategoryId == categoryId);
         }
 
-        public IEnumerable<Post> GetPostsByClient(string clientId)
+        public IQueryable<Post> GetPostsByClient(string clientId)
         {
             return _postRepository.Find(s => s.ClientId == clientId);
         }

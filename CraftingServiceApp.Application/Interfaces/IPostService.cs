@@ -4,7 +4,7 @@ namespace CraftingServiceApp.BLL.Interfaces
 {
     public interface IPostService
     {
-        IEnumerable<Post> GetPostsByCategory(int categoryId);
-        IEnumerable<Post> GetPostsByClient(string clientId);
+        IQueryable<Post> GetPostsByCategory(int categoryId);
+        IQueryable<Post> GetPostsByClient(string clientId);
     }
 }

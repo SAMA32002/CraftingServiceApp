@@ -1,4 +1,5 @@
-﻿using CraftingServiceApp.Domain.Entities;
+﻿using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ namespace CraftingServiceApp.Web.Controllers
         // POST: Ticket/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Email,Subject,Message,Status")] Ticket ticket)
+        public async Task<IActionResult> Create(Ticket ticket)
         {
             if (ModelState.IsValid)
             {

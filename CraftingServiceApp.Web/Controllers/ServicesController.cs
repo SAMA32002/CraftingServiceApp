@@ -35,7 +35,7 @@ namespace CraftingServiceApp.Web.Controllers
         // عرض جميع الخدمات
         public IActionResult Index(int? categoryId)
         {
-            var services = _context.Services.Include(s => s.Crafter).ToList();
+            var services = _ServiceRepository.GetAll().Include(s => s.Crafter).ToList();
 
             ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
@@ -50,7 +50,7 @@ namespace CraftingServiceApp.Web.Controllers
         // تفاصيل الخدمة
         public async Task<IActionResult> DetailsAsync(int id)
         {
-            var service = await _context.Services
+            var service = await _ServiceRepository.GetAll()
                 .Include(s => s.Reviews)
                 .ThenInclude(r => r.Client)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -143,7 +143,7 @@ namespace CraftingServiceApp.Web.Controllers
         [Authorize(Roles = "Crafter")]
         public IActionResult Edit(int id)
         {
-            var service = _context.Services
+            var service = _ServiceRepository.GetAll()
                 .Include(s => s.Crafter)
                 .Include(s => s.Category)
                 .FirstOrDefault(s => s.Id == id);

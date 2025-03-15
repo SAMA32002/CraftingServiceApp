@@ -6,18 +6,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using CraftingServiceApp.Infrastructure.Data;
+using CraftingServiceApp.Application.Interfaces;
 
 namespace CraftingServiceApp.Web.Controllers
 {
     public class UsersController : Controller
     {
+        private readonly IUserRepository _userRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _context;
 
-        public UsersController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
+        public UsersController(IUserRepository userRepository, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
+            _userRepository = userRepository;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
@@ -28,7 +31,7 @@ namespace CraftingServiceApp.Web.Controllers
         public async Task<IActionResult> Profile()
         {
             var userId = _userManager.GetUserId(User);
-            var user = await _context.Users
+            var user = await _userRepository.GetAll()
                 .Include(u => u.Services) // Crafter's services
                 .Include(u => u.SentRequests)
                     .ThenInclude(r => r.Service) // Include Service for sent requests

@@ -1,7 +1,6 @@
 using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.BLL.Interfaces;
 using CraftingServiceApp.Domain.Entities;
-using CraftingServiceApp.Domain.Enums;
 using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +15,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-//builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 //builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();

@@ -1,4 +1,5 @@
-﻿using CraftingServiceApp.Domain.Entities;
+﻿using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Domain.Enums;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Web.ViewModels;
@@ -12,11 +13,16 @@ namespace CraftingServiceApp.Web.Controllers
     [Authorize]
     public class RequestController : Controller
     {
+        private readonly IRepository<Request> _requestRepository;
+        private readonly IRepository<Address> _addressRepository;
+        private readonly IRepository<Service> _serviceRepository;
+        private readonly IRepository<Notification> _notificationRepository;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public RequestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public RequestController(IRepository<Request> requestRepository, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
+            _requestRepository = requestRepository;
             _context = context;
             _userManager = userManager;
         }
@@ -24,7 +30,7 @@ namespace CraftingServiceApp.Web.Controllers
         // GET: Request/Create
         public async Task<IActionResult> Create(int serviceId)
         {
-            var service = await _context.Services.FindAsync(serviceId);
+            var service = _serviceRepository.GetById(serviceId);
             if (service == null)
             {
                 return NotFound();
@@ -37,7 +43,7 @@ namespace CraftingServiceApp.Web.Controllers
             }
 
             // Load client's saved addresses
-            var clientAddresses = await _context.Address
+            var clientAddresses = await _addressRepository.GetAll()
                 .Where(a => a.ClientId == client.Id)
                 .ToListAsync();
 
@@ -80,8 +86,8 @@ namespace CraftingServiceApp.Web.Controllers
                         IsPrimary = false
                     };
 
-                    _context.Address.Add(newAddress);
-                    await _context.SaveChangesAsync();
+                    _addressRepository.Add(newAddress);
+                    await _addressRepository.SaveAsync();
                     selectedAddressId = newAddress.Id; // Use the new address for the request
                 }
             }
@@ -103,8 +109,8 @@ namespace CraftingServiceApp.Web.Controllers
             };
 
 
-            _context.Requests.Add(request);
-            await _context.SaveChangesAsync();
+            _requestRepository.Add(request);
+            await _requestRepository.SaveAsync();
 
             var schedules = new List<RequestSchedule>();
 
@@ -128,7 +134,7 @@ namespace CraftingServiceApp.Web.Controllers
             }
 
             // Send Notification to Crafter
-            var service = await _context.Services.FindAsync(model.ServiceId);
+            var service = _serviceRepository.GetById(model.ServiceId);
             if (service != null)
             {
                 var notification = new Notification
@@ -139,8 +145,8 @@ namespace CraftingServiceApp.Web.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
-                _context.Notifications.Add(notification);
-                await _context.SaveChangesAsync();
+                _notificationRepository.Add(notification);
+                await _notificationRepository.SaveAsync();
             }
 
             return RedirectToAction("Details", "Request", new { id = request.Id });
@@ -149,7 +155,7 @@ namespace CraftingServiceApp.Web.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var request = await _context.Requests
+            var request = await _requestRepository.GetAll()
                 .Include(r => r.Service)
                 .Include(r => r.ProposedDates)
                 .FirstOrDefaultAsync(r => r.Id == id);
@@ -175,7 +181,7 @@ namespace CraftingServiceApp.Web.Controllers
         public async Task<IActionResult> ReceivedRequests()
         {
             var userId = _userManager.GetUserId(User);
-            var requests = await _context.Requests
+            var requests = await _requestRepository.GetAll()
                 .Where(r => r.Service.CrafterId == userId)
                 .Include(r => r.Client)
                 .Include(r => r.Service)
@@ -189,7 +195,7 @@ namespace CraftingServiceApp.Web.Controllers
         public async Task<IActionResult> SentRequests()
         {
             var userId = _userManager.GetUserId(User); // Get the logged-in client ID
-            var sentRequests = await _context.Requests
+            var sentRequests = await _requestRepository.GetAll()
                 .Include(r => r.Service)
                 .Include(r => r.SelectedSchedule)
                 .Include(r => r.SelectedAddress)
@@ -204,7 +210,7 @@ namespace CraftingServiceApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AcceptRequest(int requestId, int selectedScheduleId)
         {
-            var request = await _context.Requests
+            var request = await _requestRepository.GetAll()
                 .Include(r => r.Service) // ✅ Include Service to avoid null reference
                 .Include(r => r.ProposedDates) // ✅ Include ProposedDates
                 .FirstOrDefaultAsync(r => r.Id == requestId);
@@ -231,9 +237,9 @@ namespace CraftingServiceApp.Web.Controllers
                 CreatedAt = DateTime.UtcNow,
                 IsRead = false
             };
-            _context.Notifications.Add(notification);
+            _notificationRepository.Add(notification);
 
-            await _context.SaveChangesAsync();
+            await _notificationRepository.SaveAsync();
 
             return RedirectToAction("ReceivedRequests");
         }
@@ -242,7 +248,7 @@ namespace CraftingServiceApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> DeclineRequest(int requestId)
         {
-            var request = await _context.Requests
+            var request = await _requestRepository.GetAll()
                 .Include(r => r.Service) // ✅ Include Service
                 .FirstOrDefaultAsync(r => r.Id == requestId);
 
@@ -257,9 +263,9 @@ namespace CraftingServiceApp.Web.Controllers
                 CreatedAt = DateTime.UtcNow,
                 IsRead = false
             };
-            _context.Notifications.Add(notification);
+            _notificationRepository.Add(notification);
 
-            await _context.SaveChangesAsync();
+            await _notificationRepository.SaveAsync();
             return RedirectToAction(nameof(ReceivedRequests));
         }
 

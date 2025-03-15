@@ -1,5 +1,4 @@
-﻿using CraftingServiceApp.Domain.Entities;
-using CraftingServiceApp.Infrastructure.Data;
+﻿using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -16,6 +15,21 @@ namespace CraftingServiceApp.Application.Interfaces
             _dbSet = _context.Set<T>();
         }
 
+        public IQueryable<T> GetAll() // Return IQueryable<T>
+        {
+            return _dbSet;
+        }
+
+        public IQueryable<T> Find(Expression<Func<T, bool>> predicate)
+        {
+            return _dbSet.Where(predicate);
+        }
+
+        public T GetById(int id)
+        {
+            return _dbSet.Find(id);
+        }
+
         public void Add(T entity)
         {
             _dbSet.Add(entity);
@@ -23,22 +37,7 @@ namespace CraftingServiceApp.Application.Interfaces
 
         public void Delete(T entity)
         {
-            _dbSet?.Remove(entity);
-        }
-
-        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
-        {
-            return _dbSet.Where(predicate).ToList();
-        }
-
-        public IEnumerable<T> GetAll()
-        {
-            return _dbSet.ToList();
-        }
-
-        public T GetById(int id)
-        {
-            return _dbSet.Find(id);
+            _dbSet.Remove(entity);
         }
 
         public void SaveChanges()
@@ -52,9 +51,23 @@ namespace CraftingServiceApp.Application.Interfaces
             _context.Entry(entity).State = EntityState.Modified;
         }
 
-        public async Task<T> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
-        public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
-        public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
-        public async Task SaveAsync() => await _context.SaveChangesAsync();
+        public async Task<T> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+        public async Task<IQueryable<T>> GetAllAsync()
+        {
+            return await Task.FromResult(_dbSet); // Return IQueryable<T> wrapped in Task
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
+
 }

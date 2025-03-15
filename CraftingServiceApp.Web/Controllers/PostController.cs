@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CraftingServiceApp.Domain.Entities;
-using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Application.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using CraftingServiceApp.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using CraftingServiceApp.BLL.Interfaces;
-using Stripe;
 using Microsoft.AspNetCore.Authorization;
 
 namespace CraftingServiceApp.Web.Controllers
@@ -106,7 +103,7 @@ namespace CraftingServiceApp.Web.Controllers
         // POST: Post/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ClientId,Title,Description,CategoryId,Status")] Post post)
+        public async Task<IActionResult> Edit(int id, Post post)
         {
             if (id != post.Id) return NotFound();
 
