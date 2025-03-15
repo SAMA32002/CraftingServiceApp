@@ -99,7 +99,6 @@ namespace CraftingServiceApp.Web.Controllers
             ViewData["CategoryId"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
             return View();
         }
-
         // إضافة خدمة جديدة
         [Authorize(Roles = "Crafter")]
         [HttpPost]
@@ -114,7 +113,7 @@ namespace CraftingServiceApp.Web.Controllers
             if (!ModelState.IsValid)
             {
                 ViewData["CategoryId"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
-                return BadRequest(new { message = "Invalid data" });
+                return View(service); // إعادة عرض الـ View مع البيانات المدخلة
             }
 
             if (service.ImageFile != null)
@@ -136,8 +135,9 @@ namespace CraftingServiceApp.Web.Controllers
             _ServiceRepository.Add(service);
             _ServiceRepository.SaveChanges();
 
-            return Json(new { success = true, message = "Service added successfully!" });
+            return RedirectToAction("Index"); // إعادة التوجيه لصفحة Index بعد النجاح
         }
+
 
         // ✅ عرض نموذج تعديل الخدمة
         [Authorize(Roles = "Crafter")]

@@ -20,6 +20,7 @@
             }
         </div>
 
+        <!-- Add Service Modal -->
         <div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -41,7 +42,6 @@
                                 <label for="Price" class="form-label">Price (EGP)</label>
                                 <input type="number" class="form-control" id="Price" name="Price" required />
                             </div>
-                            <!-- Category Dropdown -->
                             <div class="mb-3">
                                 <label for="CategoryId" class="form-label">Category</label>
                                 <select class="form-select" id="CategoryId" name="CategoryId" required>
@@ -64,7 +64,6 @@
             </div>
         </div>
 
-
         <!-- Services Grid -->
         <div class="row mt-5">
             @foreach (var service in Model)
@@ -72,20 +71,16 @@
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="card-item position-relative">
                         <div class="card border-0 bg-transparent">
-                            <!-- Image Container -->
                             <div class="card-image position-relative" style="width: 250px; height: 250px; overflow: hidden; border-radius: 10px;">
                                 <a href="@Url.Action("Details", "Services", new { id = service.Id })">
                                     <img src="@service.Image" alt="@service.Title" class="img-fluid w-100 h-100" style="object-fit: cover;">
                                 </a>
-
                                 @if (User.IsInRole("Crafter"))
                                 {
-                                    <!-- 3 Dots Menu Icon -->
                                     <div class="dropdown position-absolute top-0 end-0 m-2">
                                         <button class="btn btn-light btn-sm rounded-circle" type="button" id="dropdownMenuButton-@service.Id" data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="fas fa-ellipsis-v" style="font-size: 14px; color: #333;"></i>
                                         </button>
-
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="dropdownMenuButton-@service.Id">
                                             <li>
                                                 <a class="dropdown-item d-flex align-items-center edit-icon" href="@Url.Action("Edit", "Services", new { id = service.Id })">
@@ -105,23 +100,16 @@
                                     </div>
                                 }
                             </div>
-
-                            <!-- Card Content -->
                             <div class="card-body p-0 mt-2">
                                 <h5 class="mt-2">
                                     <a href="@Url.Action("Details", "Services", new { id = service.Id })">@service.Title</a>
                                 </h5>
                                 <p>By <strong>@(service.Crafter?.FullName ?? "Unknown")</strong></p>
-
                                 <p>
                                     @service.Description.Substring(0, Math.Min(service.Description.Length, 100))...
-                                    <a href="@Url.Action("Details", "Services", new { id = service.Id })" class="text-decoration-underline fst-italic">
-                                        Read more
-                                    </a>
+                                    <a href="@Url.Action("Details", "Services", new { id = service.Id })" class="text-decoration-underline fst-italic">Read more</a>
                                 </p>
-
                                 <span class="fw-bold text-primary">@service.Price.ToString("F2") EGP</span>
-
                             </div>
                         </div>
                     </div>
@@ -131,7 +119,6 @@
     </div>
 </section>
 
-<!-- Add Service Modal (نفس الكود السابق هنا) -->
 <!-- JS Preview Image -->
 <script>
     function previewImage(event) {
@@ -145,7 +132,7 @@
     }
 </script>
 
-<!-- AJAX Form Submission -->
+<!-- AJAX Form Submission Without JSON -->
 <script>
     $(document).ready(function () {
         $("#addServiceForm").submit(function (e) {
@@ -159,13 +146,13 @@
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function (response) {
-                    alert(response.message);
+                success: function (result) {
+                    alert(result); // مجرد نص راجع من السيرفر
                     $("#addServiceModal").modal("hide");
-                    location.reload();
+                    location.reload(); // تحديث الصفحة علشان تظهر الخدمة الجديدة
                 },
                 error: function (xhr) {
-                    alert("Error: " + xhr.responseText);
+                    alert("Error: " + xhr.status + " - " + xhr.statusText);
                 }
             });
         });
@@ -191,17 +178,14 @@
             width: 10px;
         }
 
-    /* Optional: smooth transitions for the dropdown */
     .dropdown-menu {
         transition: all 0.3s ease-in-out;
     }
 
-    /* Image hover effect */
     .card-image:hover img {
         transform: scale(1.05);
         transition: transform 0.3s ease;
     }
 </style>
 
-<!-- Font Awesome (لو مش محطوط قبل كده) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
