@@ -185,6 +185,22 @@ namespace CraftingServiceApp.Web.Controllers
             return View(requests);
         }
 
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> SentRequests()
+        {
+            var userId = _userManager.GetUserId(User); // Get the logged-in client ID
+            var sentRequests = await _context.Requests
+                .Include(r => r.Service)
+                .Include(r => r.SelectedSchedule)
+                .Include(r => r.SelectedAddress)
+                .Where(r => r.ClientId == userId)
+                .OrderByDescending(r => r.RequestDate)
+                .ToListAsync();
+
+            return View(sentRequests);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> AcceptRequest(int requestId, int selectedScheduleId)
         {

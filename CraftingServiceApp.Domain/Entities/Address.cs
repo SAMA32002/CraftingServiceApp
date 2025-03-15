@@ -13,6 +13,11 @@ namespace CraftingServiceApp.Domain.Entities
 
         // Navigation
         public ApplicationUser Client { get; set; }
+
+        public string FullAddress()
+        {
+            return $"{Street}, {City}, {PostalCode}, {Country}";
+        }
     }
 
 }
