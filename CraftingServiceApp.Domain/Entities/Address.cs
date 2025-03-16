@@ -10,7 +10,6 @@ namespace CraftingServiceApp.Domain.Entities
         public string PostalCode { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public bool IsPrimary { get; set; } // Indicates default address
-
         // Navigation
         public ApplicationUser Client { get; set; }
 

@@ -1,103 +1,172 @@
 ﻿@model CraftingServiceApp.Web.ViewModels.ProfileViewModel
 
-<h2>@Model.User.UserName's Profile</h2>
-<p>Email: @Model.User.Email</p>
-
-@if (Model.IsCrafter)
-{
-    <h3>Your Services</h3>
-    @if (Model.Services.Any())
-    {
-        <ul>
-            @foreach (var service in Model.Services)
-            {
-                <li>
-                    <a asp-controller="Services" asp-action="Details" asp-route-id="@service.Id">
-                        @service.Title
-                    </a>
-                </li>
-            }
-        </ul>
-    }
-    else
-    {
-        <p>You haven't added any services yet.</p>
-    }
-
-    <h3>Requests Received</h3>
-    @if (Model.ReceivedRequests.Any())
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Client</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var request in Model.ReceivedRequests)
+<div class="container mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="list-group d-flex flex-column">
+                <a href="#" class="list-group-item list-group-item-action active" id="tab-profile" onclick="showTab(event, 'profile')">Profile Details</a>
+                @if (Model.IsCrafter)
                 {
-                    <tr>
-                        <td>@(request.Service?.Title ?? "N/A")</td>
-                        <td>@(request.Client?.UserName ?? "Unknown Client")</td>
-                        <td>@request.RequestDate.ToShortDateString()</td>
-                        <td>@request.Status</td>
-                    </tr>
+                    <a href="#" class="list-group-item list-group-item-action" id="tab-services" onclick="showTab(event, 'services')">Your Services</a>
+                    <a href="#" class="list-group-item list-group-item-action" id="tab-requests" onclick="showTab(event, 'requests')">Received Requests</a>
                 }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>No requests received yet.</p>
-    }
-}
-else
-{
-    <h3>Requests Sent</h3>
-    @if (Model.SentRequests.Any())
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Crafter</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var request in Model.SentRequests)
+                @if (!Model.IsCrafter)
                 {
-                    <tr>
-                        <td>@(request.Service?.Title ?? "N/A")</td>
-                        <td>@(request.Service?.Crafter?.UserName ?? "Unknown Crafter")</td>
-                        <td>@request.RequestDate.ToShortDateString()</td>
-                        <td>@request.Status</td>
-                    </tr>
+                    <a href="#" class="list-group-item list-group-item-action" id="tab-sent-requests" onclick="showTab(event, 'sent-requests')">Sent Requests</a>
                 }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>You haven't sent any requests yet.</p>
-    }
+            </div>
+        </div>
 
-    <h3>Your Posts</h3>
-    @if (Model.Posts.Any())
-    {
-        <ul>
-            @foreach (var post in Model.Posts)
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Profile Section -->
+            <div id="profile-section" class="content-section">
+                <h2>Profile Details</h2>
+                <div class="d-flex align-items-center">
+                    <img src="@Model.User.ProfilePic" class="rounded-circle" width="100" height="100" alt="Profile Picture">
+                    <div class="ms-3">
+                        <h4>@Model.User.FullName</h4>
+                        <p>Email: @Model.User.Email</p>
+                        <p>Addresses:</p>
+                        <p>
+                            @if (Model.Addresses.Any())
+                            {
+                                <ul>
+                                    @foreach (var address in Model.Addresses)
+                                    {
+                                        <li>
+                                            @address.FullAddress()
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                            <p>You haven't added any address yet.</p>
+                            }
+                        </p>
+                        <form asp-action="Edit" asp-controller="Users" method="post">
+                            <button type="submit" class="btn btn-primary">Edit Profile</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.IsCrafter)
             {
-                <li>@post.Description (Posted on @post.CreatedAt.ToShortDateString())</li>
+                <!-- Services Section -->
+                <div id="services-section" class="content-section" style="display: none;">
+                    @if (Model.Services.Any())
+                    {
+                        <ul>
+                            @foreach (var service in Model.Services)
+                            {
+                                <li>
+                                    <a asp-controller="Services" asp-action="Details" asp-route-id="@service.Id">
+                                        @service.Title
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>You haven't added any services yet.</p>
+                    }
+                </div>
+
+                <!-- Received Requests Section -->
+                <div id="requests-section" class="content-section" style="display: none;">
+                    <h3>Requests Received</h3>
+                    <div id="requests-content">
+                        <p>Loading...</p>
+                    </div>
+                </div>
             }
-        </ul>
-    }
-    else
-    {
-        <p>You haven't posted anything yet.</p>
-    }
+
+            @if (!Model.IsCrafter)
+            {
+                <!-- Sent Requests Section -->
+                <div id="sent-requests-section" class="content-section" style="display: none;">
+                    <h3>Sent Requests</h3>
+                    <div id="sent-requests-content">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <!-- JavaScript for Sidebar Navigation -->
+    <script>
+                document.addEventListener("DOMContentLoaded", function () {
+            function showTab(event, tab) {
+                event.preventDefault();
+                console.log("Switching to tab:", tab); // Debugging
+
+                // Hide all sections
+                document.querySelectorAll(".content-section").forEach(section => section.style.display = "none");
+
+                // Show the selected section
+                let selectedSection = document.getElementById(tab + "-section");
+                if (!selectedSection) {
+                    console.error("Section not found:", tab + "-section");
+                    return;
+                }
+                selectedSection.style.display = "block";
+
+                // Update active sidebar link
+                document.querySelectorAll(".list-group-item").forEach(item => item.classList.remove("active"));
+                event.target.closest('a').classList.add("active");
+
+                // Load Requests dynamically
+                if (tab === "requests") {
+                    console.log("Loading received requests...");
+                    let content = document.getElementById("requests-content");
+                    if (!content) {
+                        console.error("requests-content not found in DOM");
+                        return;
+                    }
+                    fetch('/Request/ReceivedRequests', { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                        .then(response => response.text())
+                        .then(data => {
+                            console.log("Received Requests Loaded!");
+                            content.innerHTML = data;
+                        })
+                        .catch(error => console.error("Error loading received requests:", error));
+                }
+                else if (tab === "sent-requests") {
+                    console.log("Loading sent requests...");
+                    let content = document.getElementById("sent-requests-content");
+                    if (!content) {
+                        console.error("sent-requests-content not found in DOM");
+                        return;
+                    }
+                    fetch('/Request/SentRequests', { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                        .then(response => response.text())
+                        .then(data => {
+                            console.log("Sent Requests Loaded!");
+                            content.innerHTML = data;
+                        })
+                        .catch(error => console.error("Error loading sent requests:", error));
+                }
+            }
+
+            // Assign function to window for event binding
+            window.showTab = showTab;
+        });
+
+    </script>
+
+    <script>
+        function showNote(requestId, note) {
+            document.getElementById("noteContent").innerText = note;
+        }
+    </script>
 }

@@ -34,6 +34,7 @@ namespace CraftingServiceApp.Web.ViewModels
 
     public class AddressViewModel
     {
+        public int Id { get; set; }
         [Required(ErrorMessage = "Street is required")]
         [StringLength(100, ErrorMessage = "Street cannot exceed 100 characters")]
         public string Street { get; set; }
@@ -45,5 +46,6 @@ namespace CraftingServiceApp.Web.ViewModels
         [Required(ErrorMessage = "Postal Code is required")]
         [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Invalid Postal Code format")]
         public string PostalCode { get; set; }
+        public string Country { get; set; }
     }
 }

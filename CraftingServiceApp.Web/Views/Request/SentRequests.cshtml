@@ -7,57 +7,5 @@
 
 <h2 class="mb-4">My Sent Requests</h2>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">You haven't sent any requests yet.</div>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Requested On</th>
-                    <th>Status</th>
-                    <th>Scheduled Date</th>
-                    <th>Address</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var request in Model)
-                {
-                    <tr>
-                        <td>
-                            <a href="@Url.Action("Details", "Services", new { id = request.ServiceId })">
-                                @request.Service.Title
-                            </a>
-                        </td>
-                        <td>@request.RequestDate.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>
-                            <span class="badge @(request.Status == RequestStatus.Pending ? "bg-warning" : request.Status == RequestStatus.Accepted ? "bg-success" : "bg-danger")">
-                                @request.Status
-                            </span>
-                        </td>
-                        <td>@(request.ScheduledDateTime?.ToString("yyyy-MM-dd HH:mm") ?? "Not Scheduled")</td>
-                        <td>
-                            @(request.SelectedAddress != null ? request.SelectedAddress.FullAddress() : "Custom Address: " + request.CustomStreet + ", " + request.CustomCity)
-                        </td>
-                        <td>@request.Notes</td>
-                        <td>
-                            @if (request.Status == RequestStatus.Pending)
-                            {
-                                <a href="@Url.Action("Cancel", "Requests", new { id = request.Id })" class="btn btn-sm btn-danger">
-                                    Cancel
-                                </a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}
-
+<!-- Load the partial view inside -->
+<partial name="_SentRequestsPartial" model="Model" />

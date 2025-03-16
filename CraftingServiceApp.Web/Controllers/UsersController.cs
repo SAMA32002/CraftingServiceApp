@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Application.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using System.Security.Claims;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -33,11 +35,12 @@ namespace CraftingServiceApp.Web.Controllers
             var userId = _userManager.GetUserId(User);
             var user = await _userRepository.GetAll()
                 .Include(u => u.Services) // Crafter's services
+                .Include(u => u.Addresses)
                 .Include(u => u.SentRequests)
-                    .ThenInclude(r => r.Service) // Include Service for sent requests
-                    .ThenInclude(s => s.Crafter) // Include Crafter of the Service
+                .ThenInclude(r => r.Service) // Include Service for sent requests
+                .ThenInclude(s => s.Crafter) // Include Crafter of the Service
                 .Include(u => u.ReceivedRequests)
-                    .ThenInclude(r => r.Client) // Include Client for received requests
+                .ThenInclude(r => r.Client) // Include Client for received requests
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -56,12 +59,12 @@ namespace CraftingServiceApp.Web.Controllers
                 Services = user.Services?.ToList() ?? new List<Service>(),
                 ReceivedRequests = user.ReceivedRequests?.ToList() ?? new List<Request>(),
                 SentRequests = user.SentRequests?.ToList() ?? new List<Request>(),
-                Posts = _context.Posts.Where(p => p.ClientId == userId).ToList()
+                Posts = _context.Posts.Where(p => p.ClientId == userId).ToList(),
+                Addresses = user.Addresses?.ToList() ?? new List<Address>()
             };
 
             return View(viewModel);
         }
-
 
         public async Task<IActionResult> RegisterAsync()
         {
@@ -203,7 +206,6 @@ namespace CraftingServiceApp.Web.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-
 
         // تسجيل الخروج
         [HttpPost]

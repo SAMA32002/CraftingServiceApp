@@ -22,6 +22,7 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestSchedule> requestSchedules { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SliderItem> SliderItems { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

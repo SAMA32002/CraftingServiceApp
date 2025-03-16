@@ -1,0 +1,127 @@
+﻿@model List<CraftingServiceApp.Domain.Entities.Request>
+@using CraftingServiceApp.Domain.Enums
+
+
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Address</th> <!-- New column -->
+                <th>Final Appointment</th>
+                <th>Status</th>
+                <th>Note</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td>@request.Client.UserName</td>
+                    <td>@request.Service.Title</td>
+                    <td>
+                        @if (request.SelectedAddress != null)
+                        {
+                            <span>@($"{request.SelectedAddress.Street}, {request.SelectedAddress.City}, {request.SelectedAddress.Country}")</span>
+                        }
+                        else if (!string.IsNullOrEmpty(request.CustomStreet))
+                        {
+                            <span>@($"{request.CustomStreet}, {request.CustomCity}, {request.CustomCountry}")</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No Address Provided</span>
+                        }
+                    </td>
+                    <td>
+                        @if (request.ScheduledDateTime.HasValue)
+                        {
+                            <span class="text-success fw-bold">
+                                @request.ScheduledDateTime.Value.ToString("g")
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not scheduled</span>
+                        }
+                    </td>
+                    <td>
+                        <span class="badge @(request.Status == RequestStatus.Accepted ? "bg-success" :
+                                    request.Status == RequestStatus.Rejected ? "bg-danger" : "bg-warning")">
+                            @request.Status
+                        </span>
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(request.Notes))
+                        {
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal"
+                                    onclick="showNote('@request.Id', '@request.Notes.Replace("'", "\\'")')">
+                                View Note
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No Note</span>
+                        }
+                    </td>
+                    <td>
+                        @if (request.Status == RequestStatus.Pending)
+                        {
+                            <form asp-controller="Request" asp-action="AcceptRequest" method="post" class="d-inline">
+                                <input type="hidden" name="requestId" value="@request.Id" />
+                                <select name="selectedScheduleId" required class="form-select form-select-sm d-inline w-auto">
+                                    @foreach (var schedule in request.ProposedDates.Distinct())
+                                    {
+                                        <option value="@schedule.Id">@schedule.ProposedDate.ToString("g")</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <form asp-controller="Request" asp-action="DeclineRequest" method="post" class="d-inline">
+                                <input type="hidden" name="requestId" value="@request.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Response Given</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+    <!-- Modal Structure -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noteModalLabel">Request Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="noteContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>No requests received yet.</p>
+}
+
+<!-- JavaScript to Update Modal Content -->
+<script>
+    function showNote(requestId, note) {
+        document.getElementById("noteContent").innerText = note;
+    }
+</script>

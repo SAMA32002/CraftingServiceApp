@@ -20,12 +20,17 @@ namespace CraftingServiceApp.Web.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public RequestController(IRepository<Request> requestRepository, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public RequestController(IRepository<Request> requestRepository, IRepository<Address> addressRepository, IRepository<Service> serviceRepository, IRepository<Notification> notificationRepository, ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _requestRepository = requestRepository;
+            _addressRepository = addressRepository;
+            _serviceRepository = serviceRepository;
+            _notificationRepository = notificationRepository;
             _context = context;
             _userManager = userManager;
         }
+
+
 
         // GET: Request/Create
         public async Task<IActionResult> Create(int serviceId)
@@ -188,6 +193,10 @@ namespace CraftingServiceApp.Web.Controllers
                 .Include(r => r.ProposedDates) // Load available schedule dates
                 .ToListAsync();
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ReceivedRequestsPartial", requests);
+            }
             return View(requests);
         }
 
@@ -196,13 +205,17 @@ namespace CraftingServiceApp.Web.Controllers
         {
             var userId = _userManager.GetUserId(User); // Get the logged-in client ID
             var sentRequests = await _requestRepository.GetAll()
+                .Where(r => r.ClientId == userId)
                 .Include(r => r.Service)
                 .Include(r => r.SelectedSchedule)
-                .Include(r => r.SelectedAddress)
-                .Where(r => r.ClientId == userId)
+                .Include(r => r.SelectedAddress)                
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_SentRequestsPartial", sentRequests);
+            }
             return View(sentRequests);
         }
 

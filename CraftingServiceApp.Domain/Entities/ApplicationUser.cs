@@ -14,6 +14,8 @@ namespace CraftingServiceApp.Domain.Entities
 
         //public string Title { get; set; }
         public bool IsBanned { get; set; } = false;
+        public DateTime? BanDate { get; set; }
+        public int? BanDuration { get; set; } // stores ban duration in days
         public string RoleId { get; set; }
         public IdentityRole Role { get; set; }
         //public UserRole Role { get; set; } // Crafter, Client, Admin
