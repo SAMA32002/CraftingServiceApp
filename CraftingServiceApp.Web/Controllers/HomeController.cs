@@ -2,6 +2,7 @@
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 
@@ -29,5 +30,19 @@ namespace CraftingServiceApp.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        public IActionResult RecentService(int count)
+        {
+                     var services =
+                     _context.Services
+                    .OrderByDescending(s => s.Id)
+                    .Take(count)
+                    .Include(s => s.Category)
+                    .Include(s => s.Crafter)
+                    .ToList();
+
+            return View(services);
+        }
+
     }
 }

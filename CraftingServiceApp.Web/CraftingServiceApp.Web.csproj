@@ -20,8 +20,4 @@
     <ProjectReference Include="..\CraftingServiceApp.Common\CraftingServiceApp.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\uploads\" />
-  </ItemGroup>
-
 </Project>
