@@ -46,9 +46,8 @@
                             <p>You haven't added any address yet.</p>
                             }
                         </p>
-                        <form asp-action="Edit" asp-controller="Users" method="post">
-                            <button type="submit" class="btn btn-primary">Edit Profile</button>
-                        </form>
+                        <a asp-action="Edit" asp-controller="Users" asp-route-id="@Model.User.Id" class="btn btn-primary">Edit Profile</a>
+
 
                     </div>
                 </div>

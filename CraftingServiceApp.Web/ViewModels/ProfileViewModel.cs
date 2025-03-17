@@ -11,6 +11,6 @@ namespace CraftingServiceApp.Web.ViewModels
         public List<Request> ReceivedRequests { get; set; } // For crafters
         public List<Request> SentRequests { get; set; } // For clients
         public List<Post> Posts { get; set; } // For clients
-        public List<Address> Addresses { get; set; } 
+        public List<Address> Addresses { get; set; }
     }
 }

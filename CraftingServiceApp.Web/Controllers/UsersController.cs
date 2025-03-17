@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Application.Interfaces;
 using Microsoft.AspNetCore.Hosting;
-using System.Security.Claims;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -34,13 +33,13 @@ namespace CraftingServiceApp.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var user = await _userRepository.GetAll()
-                .Include(u => u.Services) // Crafter's services
+                .Include(u => u.Services) 
                 .Include(u => u.Addresses)
                 .Include(u => u.SentRequests)
-                .ThenInclude(r => r.Service) // Include Service for sent requests
-                .ThenInclude(s => s.Crafter) // Include Crafter of the Service
+                .ThenInclude(r => r.Service) 
+                .ThenInclude(s => s.Crafter) 
                 .Include(u => u.ReceivedRequests)
-                .ThenInclude(r => r.Client) // Include Client for received requests
+                .ThenInclude(r => r.Client) 
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -88,7 +87,6 @@ namespace CraftingServiceApp.Web.Controllers
                     ModelState.AddModelError(string.Empty, "Invalid role selected.");
                     return View(model);
                 }
-                // Create User object
                 var user = new ApplicationUser
                 {
                     UserName = model.Email,
@@ -103,19 +101,15 @@ namespace CraftingServiceApp.Web.Controllers
                     // Define the uploads folder (ensure `wwwroot/uploads` exists)
                     string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
 
-                    // Generate a unique file name
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ProfilePicture.FileName;
 
-                    // Combine path and filename
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                    // Save the file to wwwroot/uploads
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
                         await model.ProfilePicture.CopyToAsync(fileStream);
                     }
 
-                    // Store the relative path in the database
                     user.ProfilePic = "/uploads/" + uniqueFileName;
                 }
 
@@ -130,7 +124,6 @@ namespace CraftingServiceApp.Web.Controllers
                     });
                 }
 
-                // Save User and Addresses
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
@@ -197,7 +190,6 @@ namespace CraftingServiceApp.Web.Controllers
             return RedirectToLocal(returnUrl);
         }
 
-        // Helper method to handle redirects
         private IActionResult RedirectToLocal(string returnUrl)
         {
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -215,5 +207,111 @@ namespace CraftingServiceApp.Web.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit()
+        {
+            var user = await _userManager.Users
+                .Include(u => u.Addresses)
+                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(User));
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditProfileViewModel
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                ExistingProfilePicture = user.ProfilePic,
+                Addresses = user.Addresses.Select(a => new AddressViewModel
+                {
+                    Id = a.Id,
+                    Street = a.Street,
+                    City = a.City,
+                    PostalCode = a.PostalCode,
+                    Country = a.Country,
+                    IsPrimary = a.IsPrimary
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditProfileViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.FullName = model.FullName;
+            user.Email = model.Email;
+            user.PhoneNumber = model.PhoneNumber;
+
+            // Update password if provided
+            if (!string.IsNullOrEmpty(model.NewPassword))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+                if (!passwordResult.Succeeded)
+                {
+                    foreach (var error in passwordResult.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    return View(model);
+                }
+            }
+
+            if (model.ProfilePicture != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfilePicture.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                if (!string.IsNullOrEmpty(user.ProfilePic))
+                {
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfilePic.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProfilePicture.CopyToAsync(fileStream);
+                }
+
+                user.ProfilePic = "/uploads/" + uniqueFileName;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Profile));
+            }
+
+            ModelState.AddModelError("", "Error updating profile.");
+            return View(model);
+        }
+
     }
 }
