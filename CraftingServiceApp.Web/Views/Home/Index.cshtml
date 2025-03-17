@@ -40,9 +40,11 @@
         </div>
     </div>
 </section>
+
+<!--Start-->
 <section id="recent-services">
     <div class="container">
-        <h2 class="mb-4 text-center">Recent Services</h2>
+        <h2 class="mb-4 text-center" style="color: #1e90ff;">Recent Services</h2>
         <div class="row justify-content-center">
             @foreach (var service in Model)
             {
@@ -95,3 +97,197 @@
     </div>
 
 </section>
+<!--End-->
+
+<!-- start -->
+<!-- ********** CSS LINKS ********** -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
+<style>
+    /* Custom styles */
+    .testimonial-section {
+        background-color: #f8f9fa;
+        padding: 80px 0;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1e90ff;
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .testimonial-container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .testimonial-item {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .testimonial-text {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .client-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 0;
+        text-align: center;
+    }
+
+    .client-profession {
+        color: #6c757d;
+        text-align: center;
+    }
+
+    .thumbnail-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .thumbnail {
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        object-fit: cover;
+        margin: 15px 0;
+    }
+
+    /* Navigation buttons */
+    .custom-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background-color: #ff8c00;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+        .custom-nav.prev {
+            left: -20px;
+        }
+
+        .custom-nav.next {
+            right: -20px;
+        }
+
+        .custom-nav i {
+            color: white;
+        }
+</style>
+
+<!-- ********** TESTIMONIAL SECTION ********** -->
+<div class="testimonial-section">
+    <div class="container">
+        <h1 class="section-title">What They Say About <br />Our Services</h1>
+
+        <div class="row align-items-center">
+            <!-- Left side thumbnails -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="~/uploads/testimonial-1.jpg" alt="" style="width: 80px; height: 80px;">
+                    <img class="thumbnail" src="~/uploads/testimonial-2.jpg" alt="" style="width: 60px; height: 60px;">
+                    <img class="thumbnail" src="~/uploads/testimonial-3.jpg" alt="" style="width: 70px; height: 70px;">
+                </div>
+            </div>
+
+            <!-- Center carousel -->
+            <div class="col-lg-6">
+                <div class="testimonial-container">
+                    <!-- Custom Navigation -->
+                    <div class="custom-nav prev">
+                        <i class="bi bi-chevron-left"></i>
+                    </div>
+
+                    <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <!-- Testimonial 1 -->
+                            <div class="carousel-item active">
+                                <div class="testimonial-item">
+                                    <img class="mx-auto mb-4 rounded-circle shadow" src="~/uploads/testimonial-1.jpg" alt="" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <p class="testimonial-text">"The tailoring was beyond expectations! The dresses were delivered on time, the tailoring was meticulous, and the materials were exquisite. I could feel the attention to detail and the impeccable finishing. I would definitely work with them again."</p>
+                                    <h5 class="client-name">Asmaa</h5>
+                                </div>
+                            </div>
+
+                            <!-- Testimonial 2 -->
+                            <div class="carousel-item">
+                                <div class="testimonial-item">
+                                    <img class="mx-auto mb-4 rounded-circle shadow" src="~/uploads/testimonial-2.jpg" alt="" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <p class="testimonial-text"> "Excellent service! They came the same day I reported the problem and worked quickly and efficiently. They fixed the bathroom leak completely and at a reasonable price. The plumbing team was very professional and helpful."</p>
+                                    <h5 class="client-name">Omar</h5>
+                                </div>
+                            </div>
+
+                            <!-- Testimonial 3 -->
+                            <div class="carousel-item">
+                                <div class="testimonial-item">
+                                    <img class="mx-auto mb-4 rounded-circle shadow" src="~/uploads/testimonial-3.jpg" alt="" style="width: 100px; height: 100px; object-fit: cover;">
+                                    <p class="testimonial-text">"It was a wonderful experience! The carpenter was very professional, responded quickly, and provided me with a custom design for the furniture I requested with high quality. Their punctuality and attention to detail are truly commendable. I would recommend their service to anyone in need of professional carpentry work."</p>
+                                    <h5 class="client-name">Ahmed</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Navigation -->
+                    <div class="custom-nav next">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side thumbnails -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="thumbnail-container">
+                    <img class="thumbnail" src="~/uploads/testimonial-1.jpg" alt="" style="width: 80px; height: 80px;">
+                    <img class="thumbnail" src="~/uploads/testimonial-2.jpg" alt="" style="width: 60px; height: 60px;">
+                    <img class="thumbnail" src="~/uploads/testimonial-3.jpg" alt="" style="width: 70px; height: 70px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ********** JS CODE ********** -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // استخدام كاروسل Bootstrap بدلاً من Owl Carousel
+        const carousel = new bootstrap.Carousel(document.getElementById('testimonialCarousel'), {
+            interval: 5000,
+            wrap: true
+        });
+
+        // إضافة أحداث للأزرار المخصصة
+        document.querySelector('.custom-nav.prev').addEventListener('click', function() {
+            carousel.prev();
+        });
+
+        document.querySelector('.custom-nav.next').addEventListener('click', function() {
+            carousel.next();
+        });
+    });
+</script>
+
+<!--end -->
