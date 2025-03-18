@@ -178,6 +178,102 @@
 <!-- About End -->
 
 
+
+<!-- Fact Start -->
+<div class="container-fluid fact bg-info bg-opacity-25 my-5 py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.1s">
+                <i class="fa fa-check fa-2x text-primary mb-3"></i>
+                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-dark mb-0">Years of experience</p>
+            </div>
+            <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.3s">
+                <i class="fa fa-users-cog fa-2x text-primary mb-3"></i>
+                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-dark mb-0">Specialized technicians</p>
+            </div>
+            <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.5s">
+                <i class="fa fa-users fa-2x text-primary mb-3"></i>
+                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-dark mb-0">Satisfied customers</p>
+            </div>
+            <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.7s">
+                <i class="fa fa-wrench fa-2x text-primary mb-3"></i>
+                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-dark mb-0">Completed projects</p>
+            </div>
+        </div>
+    </div>
+</div>
+=<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Counter Up JavaScript -->
+<script>
+    $(document).ready(function() {
+        // Initialize the animation when the section comes into view
+        function startCounting() {
+            // Each counter with different final values
+            const counters = [
+                { element: $('.col-md-6:nth-child(1) h2'), finalValue: 25 },
+                { element: $('.col-md-6:nth-child(2) h2'), finalValue: 150 },
+                { element: $('.col-md-6:nth-child(3) h2'), finalValue: 1500 },
+                { element: $('.col-md-6:nth-child(4) h2'), finalValue: 750 }
+            ];
+
+            // Animate each counter
+            counters.forEach(counter => {
+                var $this = counter.element;
+
+                $({ countNum: 0 }).animate({ countNum: counter.finalValue }, {
+                    duration: 2500,
+                    easing: 'swing',
+                    step: function() {
+                        $this.text(Math.floor(this.countNum));
+                    },
+                    complete: function() {
+                        $this.text(counter.finalValue);
+                    }
+                });
+            });
+        }
+
+        // Check if Waypoint is available
+        if (typeof Waypoint !== 'undefined') {
+            // Using Waypoint for scroll-triggered animation
+            var waypoint = new Waypoint({
+                element: document.querySelector('.fact'),
+                handler: function() {
+                    startCounting();
+                    this.destroy();
+                },
+                offset: '75%'
+            });
+        } else {
+            // Fallback - start counting after a short delay
+            setTimeout(startCounting, 500);
+        }
+    });
+</script>
+
+<style>
+    .bg-info.bg-opacity-25 {
+        background-color: rgba(173, 216, 230, 0.5) !important; /* Light blue with opacity */
+    }
+
+    .text-primary {
+        color: #0d6efd !important;
+    }
+
+    .text-dark {
+        color: #212529 !important;
+    }
+</style>
+
+<!-- Fact End-->
+
+
 <!--Start-->
 <section id="recent-services">
     <div class="container">
