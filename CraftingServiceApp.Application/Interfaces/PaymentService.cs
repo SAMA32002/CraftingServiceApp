@@ -1,96 +1,106 @@
-﻿//using CraftingServiceApp.BLL.Interfaces;
-//using CraftingServiceApp.Domain.Entities;
-//using Microsoft.Extensions.Configuration;
-//using Stripe;
+﻿using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.Domain.Entities;
+using CraftingServiceApp.Domain.Enums;
+using Microsoft.Extensions.Configuration;
+using Stripe;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-//namespace CraftingServiceApp.Application.Interfaces
-//{
-//    public class PaymentService : IPaymentService
-//    {
-//        private readonly IConfiguration _configuration;
-//        private readonly IUnitOfWork<UserPayment> _unitOfWork;
-//        private readonly IUnitOfWork<UserPayment> _ServiceunitOfWork;
+namespace CraftingServiceApp.Services
+{
+    public class PaymentService : IPaymentService
+    {
+        private readonly IConfiguration _configuration;
+        private readonly IRepository<UserPayment> _userPaymentRepository;
 
-//        public PaymentService(IConfiguration configuration, IUnitOfWork<UserPayment> unitOfWork, IUnitOfWork<UserPayment> serviceunitOfWork)
-//        {
-//            _configuration = configuration;
-//            _unitOfWork = unitOfWork;
-//            _ServiceunitOfWork = serviceunitOfWork;
-//            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
-//        }
+        public PaymentService(IConfiguration configuration, IRepository<UserPayment> userPaymentRepository)
+        {
+            _configuration = configuration;
+            _userPaymentRepository = userPaymentRepository;
+        }
 
+        public async Task<UserPayment?> CreateOrUpdatePaymentIntentId(string UserId, int ServiceId, decimal Price)
+        {
+            // Set Stripe API key
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
 
+            // Here, Price is already provided, so we'll calculate the total amount
+            var amount = (long)(Price * 100); // Convert to cents
 
-//        public async Task<UserPayment?> CreateOrUpdatePaymentIntent(string userId, int serviceId, decimal price)
-//        {
-//            var service = await _ServiceunitOfWork.GetByIdAsync(serviceId);
-//            if (service is null)
-//                return null;
+            // Create a PaymentIntentService instance
+            var service = new PaymentIntentService();
+            PaymentIntent paymentIntent;
 
-//            var userPayment = await _unitOfWork
-//                                    .FindAsync(up => up.UserId == userId && up.ServiceId == serviceId);
+            // Retrieve existing UserPayment for the given UserId and ServiceId using Find()
+            var userPayment = await _userPaymentRepository
+                .Find(up => up.UserId == UserId && up.ServiceId == ServiceId) // Apply filter with Find()
+                .FirstOrDefaultAsync(); // Use FirstOrDefaultAsync() to retrieve the first result asynchronously
 
-//            var paymentService = new PaymentIntentService();
-//            PaymentIntent paymentIntent;
+            if (userPayment == null) // If no payment exists, create new payment intent
+            {
+                var options = new PaymentIntentCreateOptions()
+                {
+                    Amount = amount, // Amount in cents
+                    Currency = "usd",
+                    PaymentMethodTypes = new List<string>() { "card" }
+                };
 
-//            if (userPayment == null)
-//            {
-//                var options = new PaymentIntentCreateOptions
-//                {
-//                    Amount = (long)(price * 100),
-//                    Currency = "usd",
-//                    PaymentMethodTypes = new List<string> { "card" },
-//                    Metadata = new Dictionary<string, string>
-//                {
-//                    { "ServiceId", serviceId.ToString() },
-//                    { "UserId", userId }
-//                }
-//                };
-//                paymentIntent = await paymentService.CreateAsync(options);
+                paymentIntent = await service.CreateAsync(options);
 
-//                userPayment = new UserPayment
-//                {
-//                    UserId = userId,
-//                    ServiceId = serviceId,
-//                    PaymentId = paymentIntent.Id,
-//                    ClientSecret = paymentIntent.ClientSecret,
-//                    Amount = price
-//                };
+                // Create a new UserPayment record
+                userPayment = new UserPayment
+                {
+                    UserId = UserId,
+                    ServiceId = ServiceId,
+                    PaymentId = paymentIntent.Id,
+                    ClientSecret = paymentIntent.ClientSecret,
+                    Amount = Price,
+                    Status = PaymentStatus.Pending
+                };
 
-//                await _unitOfWork.AddAsync(userPayment);
-//            }
-//            else
-//            {
-//                var options = new PaymentIntentUpdateOptions
-//                {
-//                    Amount = (long)(price * 100)
-//                };
-//                paymentIntent = await paymentService.UpdateAsync(userPayment.PaymentId, options);
+                // Save the new UserPayment entity using the generic repository
+                await _userPaymentRepository.AddAsync(userPayment);
+                await _userPaymentRepository.SaveAsync(); // Save changes to the database
+            }
+            else // If a payment exists, update the payment intent
+            {
+                var options = new PaymentIntentUpdateOptions()
+                {
+                    Amount = amount, // Update amount if needed
+                };
 
-//                userPayment.PaymentId = paymentIntent.Id;
-//                userPayment.ClientSecret = paymentIntent.ClientSecret;
-//                userPayment.Amount = price;
+                paymentIntent = await service.UpdateAsync(userPayment.PaymentId, options);
 
-//                await _unitOfWork.UpdateAsync(userPayment);
-//            }
+                userPayment.PaymentId = paymentIntent.Id;
+                userPayment.ClientSecret = paymentIntent.ClientSecret;
 
-//            await _unitOfWork.CompleteAsync();
-//            return userPayment;
-//        }
+                // Save updated UserPayment entity
+                _userPaymentRepository.Update(userPayment); // Mark entity as modified for update
+                await _userPaymentRepository.SaveAsync();
+            }
 
-//        public async Task<bool> UpdatePaymentStatus(string paymentIntentId, bool isSuccess)
-//        {
-//            var userPayment = await _unitOfWork.FindAsync(up => up.PaymentId == paymentIntentId);
+            return userPayment;
+        }
 
-//            if (userPayment == null)
-//                return false;
+        public async Task UpdatePaymentIntentStatus(string PaymentIntentId, bool isSuccess)
+        {
+            // Retrieve the existing payment record by PaymentIntentId
+            var userPayment = await _userPaymentRepository
+                .Find(up => up.PaymentId == PaymentIntentId)
+                .FirstOrDefaultAsync(); // Find by PaymentId
 
-//            userPayment.IsSuccess = isSuccess;
-//            await _unitOfWork.UpdateAsync(userPayment);
-//            await _unitOfWork.CompleteAsync();
+            if (userPayment != null)
+            {
+                // Update the payment status based on the result
+                userPayment.Status = isSuccess ? PaymentStatus.Completed : PaymentStatus.Failed;
+                userPayment.IsSuccess = isSuccess;
 
-//            return true;
-//        }
-//    }
-
-//}
+                // Save the updated status
+                 _userPaymentRepository.Update(userPayment);
+                await _userPaymentRepository.SaveAsync(); // Save changes to the database
+            }
+        }
+    }
+}

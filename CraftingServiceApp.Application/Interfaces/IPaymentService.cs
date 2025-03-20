@@ -1,10 +1,12 @@
 ﻿using CraftingServiceApp.Domain.Entities;
+using System.Threading.Tasks;
 
 namespace CraftingServiceApp.Application.Interfaces
 {
     public interface IPaymentService
     {
-        Task<UserPayment?> CreateOrUpdatePaymentIntent(string userId, int serviceId, decimal price); // Fix serviceId type
-        Task<bool> UpdatePaymentStatus(string paymentIntentId, bool isSuccess);
+      Task<UserPayment?> CreateOrUpdatePaymentIntentId(string UserId, int ServiceId, decimal Price);
+
+       Task UpdatePaymentIntentStatus(string PaymentIntentId, bool isSuccess);
     }
 }
