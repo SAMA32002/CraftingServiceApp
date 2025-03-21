@@ -1,10 +1,8 @@
 ﻿using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.Domain.Entities;
-using CraftingServiceApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Stripe;
-using System.Threading.Tasks;
+
 
 namespace CraftingServiceApp.Controllers
 {
@@ -12,12 +10,12 @@ namespace CraftingServiceApp.Controllers
     {
         private readonly IPaymentService _paymentService;
         private readonly IConfiguration _configuration;
-        private readonly IRepository<UserPayment> _userPaymentRepository;
+        private readonly IRepository<Payment> _userPaymentRepository;
 
         // Inject the necessary services
         public PaymentController(IPaymentService paymentService,
                                  IConfiguration configuration,
-                                  IRepository<UserPayment> userPaymentRepository)
+                                  IRepository<Payment> userPaymentRepository)
         {
             _paymentService = paymentService;
             _configuration = configuration;
@@ -35,7 +33,7 @@ namespace CraftingServiceApp.Controllers
             }
 
             // Return the UserPayment with PaymentId and ClientSecret
-            return Ok(new { PaymentId = userPayment.PaymentId, ClientSecret = userPayment.ClientSecret });
+            return Ok(new { PaymentId = userPayment.PaymentIntentId, ClientSecret = userPayment.ClientSecret });
         }
 
         // Stripe Webhook endpoint to handle payment status updates from Stripe

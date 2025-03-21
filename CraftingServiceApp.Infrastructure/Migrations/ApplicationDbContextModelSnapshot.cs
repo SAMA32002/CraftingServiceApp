@@ -17,7 +17,7 @@ namespace CraftingServiceApp.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.2")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -244,6 +244,9 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CrafterId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -251,13 +254,24 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RequestId");
 
                     b.ToTable("Payments");
                 });
@@ -333,6 +347,9 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.Property<int?>("PaymentId")
                         .HasColumnType("int");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
@@ -483,6 +500,10 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -528,51 +549,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tickets");
-                });
-
-            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.UserPayment", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<string>("ClientSecret")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PaymentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequestId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("userPayments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -760,6 +736,15 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("CraftingServiceApp.Domain.Entities.Request", null)
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
                 {
                     b.HasOne("CraftingServiceApp.Domain.Entities.Category", "Category")
@@ -870,21 +855,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Crafter");
-                });
-
-            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.UserPayment", b =>
-                {
-                    b.HasOne("CraftingServiceApp.Domain.Entities.Request", null)
-                        .WithMany()
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

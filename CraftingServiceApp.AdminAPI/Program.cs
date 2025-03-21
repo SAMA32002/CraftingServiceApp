@@ -2,7 +2,6 @@
 using CraftingServiceApp.AdminAPI.Helpers;
 using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.BLL.Interfaces;
-using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

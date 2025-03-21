@@ -17,7 +17,6 @@ namespace CraftingServiceApp.Infrastructure.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Address> Address { get; set; }
-        public DbSet<UserPayment> userPayments { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<RequestSchedule> requestSchedules { get; set; }
@@ -105,24 +104,12 @@ namespace CraftingServiceApp.Infrastructure.Data
                 .Property(p => p.Amount)
                 .HasPrecision(18, 4);
 
-            // Relationship: UserPayment → User
-            builder.Entity<UserPayment>()
-                .HasOne<ApplicationUser>()
-                .WithMany()
-                .HasForeignKey(up => up.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Relationship: UserPayment → Request (Instead of Service)
-            builder.Entity<UserPayment>()
+            // Relationship: Payment → Request (Instead of Service)
+            builder.Entity<Payment>()
                 .HasOne<Request>()
                 .WithMany()
                 .HasForeignKey(up => up.RequestId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Set precision for UserPayment.Amount
-            builder.Entity<UserPayment>()
-                .Property(p => p.Amount)
-                .HasPrecision(18, 4);
 
             // Relationship: Request → Client
             builder.Entity<Request>()

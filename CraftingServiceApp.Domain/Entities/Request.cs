@@ -46,5 +46,7 @@ namespace CraftingServiceApp.Domain.Entities
         public string? CustomCity { get; set; }
         public string? CustomPostalCode { get; set; }
         public string? CustomCountry { get; set; }
+
+        public string? PaymentIntentId { get; set; }
     }
 }

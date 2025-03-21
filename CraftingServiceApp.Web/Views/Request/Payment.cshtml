@@ -1,0 +1,36 @@
+﻿@model CraftingServiceApp.Web.ViewModels.PaymentViewModel
+<script src="https://js.stripe.com/v3/"></script>
+
+<h2>Pay for @Model.ServiceTitle</h2>
+<p>Amount: @Model.Amount EGP</p>
+
+<button id="payButton">Pay Now</button>
+<p id="paymentMessage" style="display: none;"></p>
+
+<script>
+    var stripe = Stripe("@Model.PublishableKey");
+    var clientSecret = "@Model.ClientSecret"; // Use clientSecret from ViewModel
+
+    document.getElementById("payButton").addEventListener("click", async function () {
+        var payButton = document.getElementById("payButton");
+        var message = document.getElementById("paymentMessage");
+        payButton.disabled = true;
+        message.style.display = "block";
+        message.innerText = "Processing payment...";
+
+        const result = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: { /* Use an existing card element if applicable */ }
+            }
+        });
+
+        if (result.error) {
+            message.innerText = "Payment failed: " + result.error.message;
+            payButton.disabled = false; // Re-enable button if failed
+        } else if (result.paymentIntent.status === "succeeded") {
+            window.location.href = "/Request/PaymentSuccess?requestId=@Model.RequestId";
+        } else {
+            message.innerText = "Payment processing, please wait...";
+        }
+    });
+</script>

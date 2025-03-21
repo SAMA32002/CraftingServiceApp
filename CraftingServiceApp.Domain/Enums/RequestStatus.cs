@@ -9,6 +9,7 @@ namespace CraftingServiceApp.Domain.Enums
         Scheduled = 3,  // Appointment confirmed
         Paid = 4,       // Payment completed
         Completed = 5,  // Service finished
-        Expired = 6,    // Client didn't confirm in time
+        Expired = 6,    // Crafter didn't confirm in time
+        Refunded = 7,   // Client requests a refund
     }
 }

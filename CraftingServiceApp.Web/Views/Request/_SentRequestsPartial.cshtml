@@ -47,7 +47,14 @@ else
                                     Cancel
                                 </a>
                             }
+                            else if (request.Status == RequestStatus.Accepted && request.PaymentStatus == PaymentStatus.Pending)
+                            {
+                                <a href="@Url.Action("Payment", "Request", new { requestId = request.Id })" class="btn btn-sm btn-primary">
+                                    Proceed to Payment
+                                </a>
+                            }
                         </td>
+
                     </tr>
                 }
             </tbody>
