@@ -3,9 +3,6 @@ using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Stripe;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace CraftingServiceApp.Services

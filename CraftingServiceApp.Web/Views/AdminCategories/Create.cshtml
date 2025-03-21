@@ -1,0 +1,47 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Create Category";
+}
+
+<h2>Create New Category</h2>
+<form id="createCategoryForm">
+    <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="description" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+<script>
+       $("#createCategoryForm").submit(function (e) {
+        e.preventDefault();
+
+        let categoryData = {
+            name: $("#name").val(),
+            description: $("#description").val()
+        };
+
+        console.log("Sending Data: ", categoryData); // Debugging
+
+        $.ajax({
+            url: "https://localhost:7293/api/Category",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(categoryData),
+            success: function (response) {
+                console.log("Success Response:", response); // Debugging
+                alert(response.message);
+                window.location.href = "/AdminCategories";
+            },
+            error: function (xhr) {
+                console.log("Error Response:", xhr.responseText); // Debugging
+                alert(xhr.responseJSON ? xhr.responseJSON.message : "An error occurred");
+            }
+        });
+    });
+
+</script>

@@ -1,0 +1,41 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Create User";
+}
+
+<h2>Create New User</h2>
+<form id="createUserForm">
+    <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="name" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+<script>
+    $("#createUserForm").submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: "https://localhost:7293/api/user",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                name: $("#name").val(),
+                email: $("#email").val(),
+                password: $("#password").val()
+            }),
+            success: function () {
+                alert("User created successfully.");
+                window.location.href = "/AdminUsers";
+            }
+        });
+    });
+</script>
