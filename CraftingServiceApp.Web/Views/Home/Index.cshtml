@@ -1,78 +1,98 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+
 <!-- Carousel Start -->
 <div class="container-fluid p-0 mb-5">
     <div id="header-carousel" class="carousel slide" data-bs-ride="carousel">
+
+
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img class="w-100" src="~/uploads/carousel-1.jpg" alt="Image">
+                <div class="position-relative">
+                    <img class="w-100" src="~/uploads/carousel-1.jpg" alt="Image">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0, 0, 102, 0.5);"></div>
+                </div>
                 <div class="carousel-caption">
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-7 pt-5">
                                 <h1 class="display-4 text-white mb-4 animated slideInDown">We Provide Best AC Repair Services</h1>
-                                <p class="fs-5 text-body mb-4 pb-2 mx-sm-5 animated slideInDown">
+                                <p class="fs-5 text-white mb-4 pb-2 mx-sm-5 animated slideInDown">
                                     Connecting you with skilled crafters for all your home maintenance needs – from plumbing and electrical work to tailoring and repairs.
                                 </p>
-                                <a href="" class="btn btn-primary py-3 px-5 animated slideInDown">Explore More</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
             <div class="carousel-item">
-                <img class="w-100" src="uploads/2.jpg" alt="Image">
+                <div class="position-relative">
+                    <img class="w-100" src="uploads/2.jpg" alt="Image">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0, 0, 102, 0.5);"></div>
+                </div>
                 <div class="carousel-caption">
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-7 pt-5">
                                 <h1 class="display-4 text-white mb-4 animated slideInDown">Craftsmen in the manufacture of wooden furniture of the highest quality</h1>
-                                <p class="fs-5 text-body mb-4 pb-2 mx-sm-5 animated slideInDown">
-
-                                    Connecting you with skilled crafters for all your home maintenance needs – from plumbing and electrical work to tailoring and repairs. 
+                                <p class="fs-5 text-white mb-4 pb-2 mx-sm-5 animated slideInDown">
+                                    Connecting you with skilled crafters for all your home maintenance needs – from plumbing and electrical work to tailoring and repairs.
                                 </p>
-                                <a href="" class="btn btn-primary py-3 px-5 animated slideInDown">Explore More</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
+
             <div class="carousel-item">
-                <img class="w-100" src="uploads/1.jpg" alt="Image">
+                <div class="position-relative">
+                    <img class="w-100" src="uploads/1.jpg" alt="Image">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0, 0, 102, 0.5);"></div>
+                </div>
                 <div class="carousel-caption">
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-7 pt-5">
                                 <h1 class="display-4 text-white mb-4 animated slideInDown">Keep your home in top shape!</h1>
-                                <p class="fs-5 text-body mb-4 pb-2 mx-sm-5 animated slideInDown">
-
+                                <p class="fs-5 text-white mb-4 pb-2 mx-sm-5 animated slideInDown">
                                     Connecting you with skilled crafters for all your home maintenance needs – from plumbing and electrical work to tailoring and repairs.
                                 </p>
-                                <a href="" class="btn btn-primary py-3 px-5 animated slideInDown">Explore More</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
+
             <div class="carousel-item">
-                <img class="w-100" src="uploads/part-male-construction-worker.jpg" alt="Image">
+                <div class="position-relative">
+                    <img class="w-100" src="uploads/part-male-construction-worker.jpg" alt="Image">
+                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(0, 0, 102, 0.5);"></div>
+                </div>
                 <div class="carousel-caption">
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-7 pt-5">
                                 <h1 class="display-4 text-white mb-4 animated slideInDown">Fast, reliable, and hassle-free repairs.</h1>
-                                <p class="fs-5 text-body mb-4 pb-2 mx-sm-5 animated slideInDown">
-
+                                <p class="fs-5 text-white mb-4 pb-2 mx-sm-5 animated slideInDown">
                                     Connecting you with skilled crafters for all your home maintenance needs – from plumbing and electrical work to tailoring and repairs. Find trusted professionals, book hassle-free services, and get quality work done at your convenience!
                                 </p>
-                                <a href="" class="btn btn-primary py-3 px-5 animated slideInDown">Explore More</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
+
+
+
         <button class="carousel-control-prev" type="button" data-bs-target="#header-carousel"
                 data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -87,28 +107,62 @@
 </div>
 <!-- Carousel End -->
 
+
+
+
+
 <!-- About Start -->
-<!-- إضافة مكتبات CSS مباشرة في الصفحة -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
 <style>
-    /* إخفاء الصور بداية */
     .scale-img {
         opacity: 0;
-        transform: scale(0.3); /* بداية بحجم صغير */
+        transform: scale(0.3);
         transition: transform 1.5s ease-out, opacity 1.5s ease-out;
     }
+
+    /* إضافة تنسيق بسيط للجزء بتاع الطوارئ */
+    .emergency-contact {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+        .emergency-contact i {
+            color: #007bff; /* لون أيقونة التليفون */
+            font-size: 24px;
+        }
+
+    .emergency-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .emergency-text p {
+            margin: 0;
+            color: black;
+            font-weight: 500;
+            font-size: 18px;
+        }
+
+        .emergency-text h3 {
+            margin: 0;
+            color: #6c757d; /* text-secondary */
+        }
 </style>
 
 <div class="container-xxl py-5">
     <div class="container">
         <div class="row g-5">
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                <!-- تغيير لون About Us إلى أحمر -->
                 <h6 class="text-secondary text-uppercase" style="color: red !important;">About Us</h6>
                 <h1 class="mb-4">We Are Trusted Services Company Since 1990</h1>
-                <p class="mb-4">Herafy is a web platform that connects crafters with clients seeking handmade or customized services, offering secure payments and easy communication.</p>
-                
+                <p class="mb-4">
+                    Herafy is a web platform that connects crafters with clients seeking handmade or customized services, offering secure payments and easy communication.
+                </p>
+
                 <p class="fw-medium" style="color: #007bff;">
                     <i class="fa fa-check text-success me-3"></i>
                     Residential & commercial plumbing
@@ -124,20 +178,18 @@
                     Immediate 24/7 emergency services
                 </p>
 
-                <!-- تغيير لون الزر إلى أزرق -->
-                <div class="bg-primary d-flex align-items-center p-4 mt-5" style="background-color: lightsteelblue!important;">
-                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center bg-white" style="width: 60px; height: 60px;">
-                        <i class="fa fa-phone-alt fa-2x text-primary"></i>
-                    </div>
-                    <div class="ms-3">
-                        <p class="fs-5 fw-medium mb-2 text-white" style="color: black;" >Emergency 24/7</p>
-                        <h3 class="m-0 text-secondary">+012 345 6789</h3>
+                <!-- ✅ Emergency Contact مع الأيقونة -->
+                <div class="emergency-contact">
+                    <i class="fas fa-phone-alt"></i>
+                    <div class="emergency-text">
+                       <h3>+012 345 6789</h3>
                     </div>
                 </div>
+
             </div>
+
             <div class="col-lg-6 pt-4" style="min-height: 500px;">
                 <div class="position-relative h-100 wow fadeInUp" data-wow-delay="0.5s">
-                    <!-- إضافة فئة scale-img للصور -->
                     <img class="position-absolute img-fluid w-100 h-100 scale-img" id="img1" src="~/uploads/about-1.jpg" style="object-fit: cover; padding: 0 0 50px 100px;" alt="">
                     <img class="position-absolute start-0 bottom-0 img-fluid bg-white pt-2 pe-2 w-50 h-50 scale-img" id="img2" src="~/uploads/team-1.jpg" style="object-fit: cover;" alt="">
                 </div>
@@ -148,25 +200,20 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
 <script>
-    // تفعيل مكتبة WOW.js
     document.addEventListener('DOMContentLoaded', function() {
         new WOW().init();
 
-        // دالة لتكبير الصورة بشكل تدريجي
         function growImage(imageId, delay) {
             setTimeout(function() {
                 var img = document.getElementById(imageId);
-
-                // تغيير حجم الصورة تدريجياً
                 img.style.transform = "scale(1)";
                 img.style.opacity = "1";
             }, delay);
         }
 
-        // تطبيق تأثير التكبير على الصور بعد فترة
         setTimeout(function() {
-            growImage('img1', 700);  // الصورة الأولى بعد 700 مللي ثانية
-            growImage('img2', 1200); // الصورة الثانية بعد 1200 مللي ثانية
+            growImage('img1', 700);
+            growImage('img2', 1200);
         }, 300);
     });
 </script>
@@ -174,42 +221,51 @@
 
 
 
+
+
+
 <!-- Fact Start -->
-<div class="container-fluid fact bg-info bg-opacity-25 my-5 py-5">
-    <div class="container">
+<div class="container-fluid fact fact-bg my-5 py-5 position-relative overflow-hidden">
+    <!-- الخلفية بصورة -->
+    <img src="/uploads/carousel-1.jpg" alt="Background Image" class="fact-bg-img">
+
+    <!-- طبقة التعتيم -->
+    <div class="fact-bg-overlay"></div>
+
+    <!-- المحتوى -->
+    <div class="container position-relative z-index-2">
         <div class="row g-4">
             <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.1s">
-                <i class="fa fa-check fa-2x text-primary mb-3"></i>
-                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
-                <p class="text-dark mb-0">Years of experience</p>
+                <i class="fa fa-check fa-2x text-white mb-3"></i>
+                <h2 class="text-white mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-white mb-0">Years of experience</p>
             </div>
             <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.3s">
-                <i class="fa fa-users-cog fa-2x text-primary mb-3"></i>
-                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
-                <p class="text-dark mb-0">Specialized technicians</p>
+                <i class="fa fa-users-cog fa-2x text-white mb-3"></i>
+                <h2 class="text-white mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-white mb-0">Specialized technicians</p>
             </div>
             <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.5s">
-                <i class="fa fa-users fa-2x text-primary mb-3"></i>
-                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
-                <p class="text-dark mb-0">Satisfied customers</p>
+                <i class="fa fa-users fa-2x text-white mb-3"></i>
+                <h2 class="text-white mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-white mb-0">Satisfied customers</p>
             </div>
             <div class="col-md-6 col-lg-3 text-center wow fadeIn" data-wow-delay="0.7s">
-                <i class="fa fa-wrench fa-2x text-primary mb-3"></i>
-                <h2 class="text-dark mb-2" data-toggle="counter-up">0</h2>
-                <p class="text-dark mb-0">Completed projects</p>
+                <i class="fa fa-wrench fa-2x text-white mb-3"></i>
+                <h2 class="text-white mb-2" data-toggle="counter-up">0</h2>
+                <p class="text-white mb-0">Completed projects</p>
             </div>
         </div>
     </div>
 </div>
+
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Counter Up JavaScript -->
 <script>
-    $(document).ready(function() {
-        // Initialize the animation when the section comes into view
+    $(document).ready(function () {
         function startCounting() {
-            // Each counter with different final values
             const counters = [
                 { element: $('.col-md-6:nth-child(1) h2'), finalValue: 25 },
                 { element: $('.col-md-6:nth-child(2) h2'), finalValue: 150 },
@@ -217,56 +273,109 @@
                 { element: $('.col-md-6:nth-child(4) h2'), finalValue: 750 }
             ];
 
-            // Animate each counter
             counters.forEach(counter => {
                 var $this = counter.element;
-
                 $({ countNum: 0 }).animate({ countNum: counter.finalValue }, {
                     duration: 2500,
                     easing: 'swing',
-                    step: function() {
+                    step: function () {
                         $this.text(Math.floor(this.countNum));
                     },
-                    complete: function() {
+                    complete: function () {
                         $this.text(counter.finalValue);
+                        $this.addClass('counter-complete');
                     }
                 });
             });
         }
 
-        // Check if Waypoint is available
         if (typeof Waypoint !== 'undefined') {
-            // Using Waypoint for scroll-triggered animation
             var waypoint = new Waypoint({
                 element: document.querySelector('.fact'),
-                handler: function() {
+                handler: function () {
                     startCounting();
                     this.destroy();
                 },
                 offset: '75%'
             });
         } else {
-            // Fallback - start counting after a short delay
             setTimeout(startCounting, 500);
         }
     });
 </script>
 
+<!-- CSS -->
 <style>
-    .bg-info.bg-opacity-25 {
-        background-color: rgba(173, 216, 230, 0.5) !important; /* Light blue with opacity */
+    .fact-bg {
+        position: relative;
+        width: 100%;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .text-primary {
-        color: #0d6efd !important;
+    .fact-bg-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* تغطية الخلفية */
+        z-index: 0;
     }
 
-    .text-dark {
-        color: #212529 !important;
+    .fact-bg-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 102, 0.6); /* طبقة شفافة بلون كحلي */
+        z-index: 1;
+    }
+
+    .fact-bg .container {
+        z-index: 2;
+    }
+
+    .text-white {
+        color: #ffffff !important;
+    }
+
+    .fact-bg h2 {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        font-weight: bold;
+        font-size: 3rem;
+        transition: text-shadow 0.5s ease;
+    }
+
+    .fact-bg i {
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    }
+
+    .counter-complete {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important;
+        transition: text-shadow 0.5s ease !important;
+    }
+
+    .fact-bg h2.counter-complete:hover {
+        text-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+    }
+
+    .z-index-2 {
+        position: relative;
+        z-index: 2;
     }
 </style>
+<!-- Fact End -->
 
-<!-- Fact End-->
+
+
+
+
+
+
 <!--Start-->
 
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
@@ -274,7 +383,12 @@
 <!--Start-->
 <section id="recent-services">
     <div class="container">
-        <h2 class="mb-4 text-center" style="color: #1e90ff;">Recent Services</h2>
+        <h1 class="display-6 mb-4 fw-bold text-center">
+            <i class="bi bi-tools text-primary"></i>  Recent Services
+        </h1>
+
+
+
         <div class="row justify-content-center">
             @{
                 var delay = 0; // علشان نخلي فيه وقت تأخير بين كل كارت
@@ -458,7 +572,14 @@
 <div class="container-xxl py-5">
     <div class="container">
         <div class="text-center mx-auto" style="max-width: 500px;">
-            <h1 class="display-6 mb-5">Our Professional Team Members</h1>
+
+
+            <h1 class="display-6 mb-4 fw-bold text-center">
+                <i class="bi bi-person-plus text-primary"></i></i>
+                </i>Our Professional Team Members
+</h1>
+
+
         </div>
         <div class="row g-4">
             <!-- Member 1 -->
@@ -571,7 +692,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 123, 255, 0.7);
+        background-color: rgba(0, 0, 102, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -611,22 +732,12 @@
 <!-- لو عاوزة تفعلي أي مكتبة مثل FontAwesome -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 <!-- Team End -->
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- ********** TESTIMONIAL SECTION ********** -->
 <div class="testimonial-section">
     <div class="container">
-        <h1 class="section-title">What They Say About <br />Our Services ? </h1>
+        <h1 class="display-6 mb-4 fw-bold text-center">
+            <i class="bi bi-chat-left-quote text-primary"></i> What They Say About <br />Our Services?
+        </h1>
 
         <div class="row align-items-center">
             <!-- Left side thumbnails -->
@@ -642,7 +753,6 @@
                          style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-left: 80px;">
                 </div>
             </div>
-
 
             <!-- Center carousel -->
             <div class="col-lg-6">
@@ -706,7 +816,6 @@
                          style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-left: 50px;">
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -715,14 +824,7 @@
 <style>
     .testimonial-section {
         padding: 60px 0;
-        background-color: #f8f9fa;
-    }
-
-    .section-title {
-        text-align: center;
-        margin-bottom: 50px;
-        color: #0d6efd;
-        font-weight: bold;
+        background-color: #ffffff; /* أبيض */
     }
 
     .testimonial-container {
@@ -767,12 +869,12 @@
         object-fit: cover;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         transition: all 0.5s ease-in-out;
-        transform: scale(0.3); /* تصغير الصور مبدئياً */
+        transform: scale(0.3);
         opacity: 0.3;
     }
 
         .thumbnail.active {
-            transform: scale(1); /* تكبير الصور لما تظهر */
+            transform: scale(1);
             opacity: 1;
         }
 
@@ -787,7 +889,7 @@
     .custom-nav {
         width: 40px;
         height: 40px;
-        background-color: #fd7e14;
+        background-color: #0d6efd;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -799,7 +901,7 @@
     }
 
         .custom-nav:hover {
-            background-color: #e96b02;
+            background-color: #0b5ed7;
         }
 </style>
 
@@ -807,13 +909,11 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        // Bootstrap Carousel Initialization
         const carousel = new bootstrap.Carousel(document.getElementById('testimonialCarousel'), {
             interval: 5000,
             wrap: true
         });
 
-        // Custom Navigation Buttons
         document.querySelector('.custom-nav.prev').addEventListener('click', function () {
             carousel.prev();
         });
@@ -822,16 +922,15 @@
             carousel.next();
         });
 
-        // Intersection Observer for Thumbnails
         const thumbnails = document.querySelectorAll('.thumbnail');
         const testimonialSection = document.querySelector('.testimonial-section');
 
         const observerOptions = {
-            root: null, // viewport
-            threshold: 0.3 // لما 30% من العنصر يظهر
+            root: null,
+            threshold: 0.3
         };
 
-        const observerCallback = (entries, observer) => {
+        const observerCallback = (entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     thumbnails.forEach(thumb => {
@@ -849,14 +948,12 @@
         observer.observe(testimonialSection);
     });
 </script>
-<!-- end-->
 
-<!-- زر العودة للأعلى -->
-<!-- في قسم head -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
-<!-- قبل إغلاق body -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+<!-- ********** BACK TO TOP BUTTON ********** -->
 <a href="#" class="btn btn-lg btn-primary btn-lg-square rounded-circle back-to-top">
     <i class="bi bi-arrow-up"></i>
 </a>
@@ -883,21 +980,19 @@
         }
 
         .back-to-top:hover {
-            background-color: #0056b3;
+            background-color: #0b5ed7;
         }
 </style>
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // التحقق من وجود jQuery
+        $(document).ready(function () {
             if (typeof jQuery == 'undefined') {
                 console.error('هذا الكود يتطلب jQuery. الرجاء تضمين jQuery في مشروعك.');
                 return;
             }
 
-            // إظهار/إخفاء الزر عند التمرير
-            $(window).scroll(function() {
+            $(window).scroll(function () {
                 if ($(this).scrollTop() > 300) {
                     $('.back-to-top').addClass('show');
                 } else {
@@ -905,12 +1000,15 @@
                 }
             });
 
-            // التمرير لأعلى عند النقر على الزر
-            $('.back-to-top').click(function(e) {
+            $('.back-to-top').click(function (e) {
                 e.preventDefault();
-                $('html, body').animate({scrollTop: 0}, 800);
+                $('html, body').animate({ scrollTop: 0 }, 800);
                 return false;
             });
         });
     </script>
 }
+
+<!-- ********** REQUIRED LINKS ********** -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
