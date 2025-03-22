@@ -266,66 +266,35 @@
             </div>
         </nav>
         <hr class="m-0">
-        <nav id="primary-header" class="navbar navbar-expand-lg py-3">
-            <div class="container justify-content-end">
-                <button class="navbar-toggler d-flex d-lg-none justify-content-end border-0 shadow-none p-0" type="button"
-                        data-bs-toggle="offcanvas" data-bs-target="#bdNavbar" aria-controls="bdNavbar" aria-expanded="false">
-                    <svg class="navbar-icon" width="60" height="60">
-                        <use xlink:href="#navbar-icon"></use>
-                    </svg>
-                </button>
-                <div class="header-bottom offcanvas offcanvas-end" id="bdNavbar" aria-labelledby="bdNavbarOffcanvasLabel">
-                    <div class="offcanvas-header px-4 mt-3 mb-1">
-                        <button type="button" class="btn-close btn-close-black shadow-none" data-bs-dismiss="offcanvas"
-                                aria-label="Close" data-bs-target="#bdNavbar"></button>
-                    </div>
-                    <div class="offcanvas-body align-items-center justify-content-center">
-                        <ul class="navbar-nav mb-2 mb-lg-0">
-                            <li class="nav-item px-3 py-1 py-lg-0">
-                                <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
-                            </li>
-                            <li class="nav-item px-3 py-1 py-lg-0">
-                                <a asp-controller="Services" asp-action="Index" class="nav-link">Services</a>
-                            </li>
-                            <li class="nav-item px-3 py-1 py-lg-0">
-                                <a asp-controller="Post" asp-action="Index" class="nav-link">Requests</a>
-                            </li>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse justify-content-md-center" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item px-3 py-1 py-lg-0">
+                            <a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
+                        </li>
+                        <li class="nav-item px-3 py-1 py-lg-0">
+                            <a asp-controller="Services" asp-action="Index" class="nav-link">Services</a>
+                        </li>
+                        <li class="nav-item px-3 py-1 py-lg-0">
+                            <a asp-controller="Post" asp-action="Index" class="nav-link">Requests</a>
+                        </li>
 
-                            <li class="nav-item px-3 py-1 py-lg-0">
-                                <a asp-controller="Crafters" asp-action="Index" class="nav-link">Crafters</a>
-                            </li>
+                        <li class="nav-item px-3 py-1 py-lg-0">
+                            <a asp-controller="Crafters" asp-action="Index" class="nav-link">Crafters</a>
+                        </li>
 
-                            <li class="nav-item px-3 py-1 py-lg-0">
-                                <a asp-controller="Ticket" asp-action="SubmitTicket" class="nav-link">Contact Us</a>
-                            </li>
-
-                            <li class="nav-item search-dropdown py-3 py-lg-0 ms-3 ms-lg-5 dropdown">
-                                <a class="nav-link p-0 search dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
-                                   aria-expanded="false">
-                                    <svg class="search" width="24" height="24">
-                                        <use xlink:href="#search"></use>
-                                    </svg>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end animate slide mt-3 border-0 p-3 shadow">
-                                    <li class="position-relative d-flex align-items-center p-0">
-                                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                                        <button class="btn btn-primary position-absolute end-0" type="submit">
-                                            <svg class="search" width="24" height="24">
-                                                <use xlink:href="#search"></use>
-                                            </svg>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
+                        <li class="nav-item px-3 py-1 py-lg-0">
+                            <a asp-controller="Ticket" asp-action="SubmitTicket" class="nav-link">Contact Us</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
     </header>
 
     <div class="container-fluid featurs py-5">
-        <div class="container py-5">
+        <div class="container">
             <div class="row g-4">
                 @RenderBody()
             </div>
