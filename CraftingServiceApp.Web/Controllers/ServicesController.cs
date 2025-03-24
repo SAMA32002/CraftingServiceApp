@@ -31,6 +31,25 @@ namespace CraftingServiceApp.Web.Controllers
             _ReviewRepository = reviewRepository;
             _context = context;
         }
+        public async Task<IActionResult> Index(ServiceFilterViewModel filter)
+        {
+            var servicesQuery = _context.Services.AsQueryable();
+            if (filter.MinPrice.HasValue)
+                servicesQuery = servicesQuery.Where(s => s.Price >= filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue)
+                servicesQuery = servicesQuery.Where(s => s.Price <= filter.MaxPrice.Value);
+
+            servicesQuery = filter.SortBy switch
+            {
+                "price_asc" => servicesQuery.OrderBy(s => s.Price),
+                "price_desc" => servicesQuery.OrderByDescending(s => s.Price),
+                _ => servicesQuery
+            };
+
+            var services = await servicesQuery.ToListAsync();
+            return View(services);
+        }
 
         // عرض جميع الخدمات
         public IActionResult Index(int? categoryId)
