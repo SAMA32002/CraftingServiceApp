@@ -31,7 +31,7 @@ namespace CraftingServiceApp.Web.Controllers
             _ReviewRepository = reviewRepository;
             _context = context;
         }
-        public async Task<IActionResult> Index(ServiceFilterViewModel filter)
+        public async Task<IActionResult> Filter(ServiceFilterViewModel filter)
         {
             var servicesQuery = _context.Services.Include(s => s.Reviews).AsQueryable();
             // Apply price filtering
