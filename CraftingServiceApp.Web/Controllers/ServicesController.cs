@@ -33,17 +33,28 @@ namespace CraftingServiceApp.Web.Controllers
         }
         public async Task<IActionResult> Index(ServiceFilterViewModel filter)
         {
-            var servicesQuery = _context.Services.AsQueryable();
+            var servicesQuery = _context.Services.Include(s => s.Reviews).AsQueryable();
+            // Apply price filtering
             if (filter.MinPrice.HasValue)
                 servicesQuery = servicesQuery.Where(s => s.Price >= filter.MinPrice.Value);
 
             if (filter.MaxPrice.HasValue)
                 servicesQuery = servicesQuery.Where(s => s.Price <= filter.MaxPrice.Value);
 
+            // Apply rating filtering (without average)
+            if (filter.MinRating.HasValue)
+                servicesQuery = servicesQuery.Where(s => s.Reviews.Any(r => r.Rating >= filter.MinRating.Value));
+
+            if (filter.MaxRating.HasValue)
+                servicesQuery = servicesQuery.Where(s => s.Reviews.Any(r => r.Rating <= filter.MaxRating.Value));
+
+            // Sorting
             servicesQuery = filter.SortBy switch
             {
                 "price_asc" => servicesQuery.OrderBy(s => s.Price),
                 "price_desc" => servicesQuery.OrderByDescending(s => s.Price),
+                "rating_asc" => servicesQuery.OrderBy(s => s.Reviews.Any() ? s.Reviews.Min(r => r.Rating) : 0), // Sort by lowest review
+                "rating_desc" => servicesQuery.OrderByDescending(s => s.Reviews.Any() ? s.Reviews.Max(r => r.Rating) : 0), // Sort by highest review
                 _ => servicesQuery
             };
 
