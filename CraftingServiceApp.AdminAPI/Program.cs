@@ -23,6 +23,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerService();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 builder.Services.AddTransient<EmailService>();
