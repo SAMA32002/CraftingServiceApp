@@ -1,5 +1,8 @@
-﻿using CraftingServiceApp.Domain.Entities;
+﻿using CraftingServiceApp.AdminAPI.Dtos;
+using CraftingServiceApp.Domain.Entities;
+using CraftingServiceApp.Domain.Enums;
 using CraftingServiceApp.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -127,5 +130,79 @@ namespace CraftingServiceApp.AdminAPI.Controllers
             return Ok(new { Message = $"User role updated to {newRole}" });
         }
 
-}
+        [HttpGet("GetAllUsers")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _userManager.Users.ToListAsync();
+
+            if (users == null || !users.Any())
+            {
+                return NotFound(new { Message = "No users found" });
+            }
+
+            var userList = users.Select(u => new
+            {
+                u.Id,
+                u.UserName,
+                u.Email,
+                u.FullName,
+                u.IsBanned
+            }).ToList();
+
+            // Get the total count of users
+            var totalCount = users.Count();
+
+            return Ok(new { TotalCount = totalCount, Users = userList });
+        }
+
+
+        [HttpPost("CreateUser")]
+        [Authorize(Roles = "Admin")] // Only Admins can create users
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest model)
+        {
+            if (model == null)
+            {
+                return BadRequest(new { Message = "Invalid user data" });
+            }
+
+            // Check if the email already exists
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                return BadRequest(new { Message = "Email is already in use" });
+            }
+
+            // Create a new ApplicationUser
+            var user = new ApplicationUser
+            {
+                UserName = model.UserName,
+                Email = model.Email,
+                FullName = model.FullName,
+                IsBanned = false // Default is not banned
+            };
+
+            // Create the user with the password provided in the request
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                // Automatically assign the 'Admin' role to the new user
+                var roleToAssign = UserRole.Admin.ToString();
+
+                // Add the 'Admin' role to the user
+                var addRoleResult = await _userManager.AddToRoleAsync(user, roleToAssign);
+                if (!addRoleResult.Succeeded)
+                {
+                    return BadRequest(new { Message = "Error occurred while assigning role to the user", Errors = addRoleResult.Errors });
+                }
+
+                return Ok(new { Message = "User created successfully", UserId = user.Id });
+            }
+
+            return BadRequest(new { Message = "Error occurred while creating the user", Errors = result.Errors });
+        }
+
+
+    }
+
+
 }
