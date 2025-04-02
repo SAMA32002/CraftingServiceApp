@@ -142,17 +142,18 @@ namespace CraftingServiceApp.AdminAPI.Controllers
 
             var userList = users.Select(u => new
             {
-                u.Id,
-                u.UserName,
-                u.Email,
-                u.FullName,
-                u.IsBanned
+                Id = u.Id,
+                Username = u.UserName,
+                Email = u.Email,
+                FullName = u.FullName,
+                IsBanned = u.IsBanned
             }).ToList();
 
             // Get the total count of users
             var totalCount = users.Count();
 
-            return Ok(new { TotalCount = totalCount, Users = userList });
+            //return Ok(new { TotalCount = totalCount, Users = userList });
+            return Ok(userList);
         }
 
 

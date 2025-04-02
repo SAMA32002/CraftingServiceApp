@@ -4,13 +4,6 @@ namespace CraftingServiceApp.Controllers
 {
     public class AdminUsersController : Controller
     {
-        private readonly IConfiguration _configuration;
-
-        public AdminUsersController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         public IActionResult Index()
         {
             return View();
@@ -21,7 +14,7 @@ namespace CraftingServiceApp.Controllers
             return View();
         }
 
-        public IActionResult Edit(string id)
+        public IActionResult Edit(int id)
         {
             ViewBag.UserId = id; // Pass User ID to Edit View
             return View();

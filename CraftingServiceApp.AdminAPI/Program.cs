@@ -2,13 +2,19 @@
 using CraftingServiceApp.AdminAPI.Helpers;
 using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.BLL.Interfaces;
+using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddCors(options =>
 {
