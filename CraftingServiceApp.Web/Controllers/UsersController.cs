@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Application.Interfaces;
-using Microsoft.AspNetCore.Hosting;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -98,7 +97,6 @@ namespace CraftingServiceApp.Web.Controllers
 
                 if (model.ProfilePicture != null)
                 {
-                    // Define the uploads folder (ensure `wwwroot/uploads` exists)
                     string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
 
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ProfilePicture.FileName;
@@ -121,6 +119,7 @@ namespace CraftingServiceApp.Web.Controllers
                         Street = addressViewModel.Street,
                         City = addressViewModel.City,
                         PostalCode = addressViewModel.PostalCode,
+                        Country = "Egypt"
                     });
                 }
 
@@ -233,8 +232,8 @@ namespace CraftingServiceApp.Web.Controllers
                     Street = a.Street,
                     City = a.City,
                     PostalCode = a.PostalCode,
-                    Country = a.Country,
-                    IsPrimary = a.IsPrimary
+                    //Country = a.Country,
+                    IsPrimary = false,
                 }).ToList()
             };
 

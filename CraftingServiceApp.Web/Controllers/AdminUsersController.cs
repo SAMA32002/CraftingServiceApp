@@ -16,7 +16,7 @@ namespace CraftingServiceApp.Controllers
 
         public IActionResult Edit(int id)
         {
-            ViewBag.UserId = id; // Pass User ID to Edit View
+            ViewBag.UserId = id;
             return View();
         }
     }

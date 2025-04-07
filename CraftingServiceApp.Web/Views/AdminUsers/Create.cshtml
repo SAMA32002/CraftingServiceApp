@@ -3,11 +3,15 @@
     ViewData["Title"] = "Create User";
 }
 
-<h2>Create New User</h2>
+<h2>Create New Admin User</h2>
 <form id="createUserForm">
     <div class="form-group">
-        <label>Name</label>
-        <input type="text" id="name" class="form-control" required>
+        <label>Full Name</label>
+        <input type="text" id="fullName" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label>User Name</label>
+        <input type="text" id="userName" class="form-control" required>
     </div>
     <div class="form-group">
         <label>Email</label>
@@ -17,25 +21,37 @@
         <label>Password</label>
         <input type="password" id="password" class="form-control" required>
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>
+    <button type="submit" class="btn btn-primary mt-2">Create</button>
 </form>
 
 <script>
     $("#createUserForm").submit(function (e) {
         e.preventDefault();
+
         $.ajax({
-            url: "https://localhost:7293/api/user",
+            url: "https://localhost:7293/api/user/CreateUser",
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify({
-                name: $("#name").val(),
+                fullName: $("#fullName").val(),
+                userName: $("#userName").val(),
                 email: $("#email").val(),
                 password: $("#password").val()
             }),
-            success: function () {
-                alert("User created successfully.");
+            success: function (response) {
+                alert(response.message || "User created successfully.");
                 window.location.href = "/AdminUsers";
+            },
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON?.message || "An error occurred.";
+                alert("Error: " + errorMessage);
             }
         });
     });
+</script>
+
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
 </script>

@@ -24,6 +24,22 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "ClientScheme"; // default for clients/crafters
+})
+.AddCookie("ClientScheme", options =>
+{
+    options.LoginPath = "/Users/Login"; // your existing login
+    options.AccessDeniedPath = "/Users/AccessDenied";
+})
+.AddCookie("AdminScheme", options =>
+{
+    options.LoginPath = "/Admin/AdminLogin";
+    options.AccessDeniedPath = "/Admin/AccessDenied";
+});
+
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

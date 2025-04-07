@@ -4,14 +4,25 @@
 }
 
 <h2>User Management</h2>
-<a href="/AdminUsers/Create" class="btn btn-primary">Add User</a>
+
+<div class="d-flex align-items-center">
+    <a href="/AdminUsers/Create" class="btn btn-primary">Add User</a>
+
+    <!-- Role Filter Dropdown -->
+    <select id="roleFilter" class="form-control mx-3" style="width: 200px;">
+        <option>---Choose User Role---</option>
+        <option value="Admin">Admins</option>
+        <option value="Crafter">Crafters</option>
+        <option value="Client">Clients</option>
+    </select>
+</div>
 
 <table class="table table-striped mt-3">
     <thead>
         <tr>
-            <th>ID</th>
-            <th>Full Name</th>
+            <th>Name</th>
             <th>Email</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -23,20 +34,22 @@
 <script>
     $(document).ready(function () {
         loadUsers();
+
+        // Event listener for role filter
+        $("#roleFilter").change(function () {
+            loadUsers();
+        });
     });
 
-       function loadUsers() {
+    function loadUsers() {
         $.ajax({
             url: "https://localhost:7293/api/User/GetAllUsers",
             method: "GET",
             success: function (data) {
-                console.log("API Response:", data); // Debugging
+                console.log("API Response:", data);
 
-                // ✅ Ensure `data` is an array
                 if (!Array.isArray(data)) {
                     console.error("Error: Expected an array but got", typeof data);
-
-                    // If the API wraps users inside an object, try to extract it
                     if (data.users && Array.isArray(data.users)) {
                         data = data.users;
                     } else {
@@ -45,15 +58,22 @@
                     }
                 }
 
+                let selectedRole = $("#roleFilter").val();
+                let filteredUsers = data;
+
+                if (selectedRole !== "all") {
+                    filteredUsers = data.filter(user => user.role === selectedRole);
+                }
+
                 let tableBody = "";
-                if (data.length === 0) {
+                if (filteredUsers.length === 0) {
                     tableBody = "<tr><td colspan='6'>No users found.</td></tr>";
                 } else {
-                    data.forEach(user => {
+                    filteredUsers.forEach(user => {
                         tableBody += `<tr>
-                            <td>${user.id}</td>
                             <td>${user.fullName}</td>
                             <td>${user.email}</td>
+                            <td>${user.isBanned? 'Banned' : 'Active'}</td>
                             <td>
                                 <a href="/AdminUsers/Edit/${user.id}" class="btn btn-sm btn-warning">Edit</a>
                                 <button onclick="deleteUser('${user.id}')" class="btn btn-sm btn-danger">Delete</button>
@@ -70,7 +90,6 @@
         });
     }
 
-
     function deleteUser(id) {
         if (confirm("Are you sure you want to delete this user?")) {
             $.ajax({
@@ -78,7 +97,7 @@
                 method: "DELETE",
                 success: function (response) {
                     alert(response.message);
-                    loadUsers(); // Refresh the table
+                    loadUsers();
                 },
                 error: function (xhr) {
                     alert(xhr.responseJSON.message);

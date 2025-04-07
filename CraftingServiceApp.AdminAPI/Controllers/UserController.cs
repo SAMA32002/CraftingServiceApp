@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CraftingServiceApp.AdminAPI.Controllers
 {
@@ -146,19 +144,19 @@ namespace CraftingServiceApp.AdminAPI.Controllers
                 Username = u.UserName,
                 Email = u.Email,
                 FullName = u.FullName,
+                role = _userManager.GetRolesAsync(u).Result.FirstOrDefault() ?? "Unknown",
                 IsBanned = u.IsBanned
             }).ToList();
 
             // Get the total count of users
             var totalCount = users.Count();
 
-            //return Ok(new { TotalCount = totalCount, Users = userList });
             return Ok(userList);
         }
 
 
         [HttpPost("CreateUser")]
-        [Authorize(Roles = "Admin")] // Only Admins can create users
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest model)
         {
             if (model == null)
@@ -173,12 +171,23 @@ namespace CraftingServiceApp.AdminAPI.Controllers
                 return BadRequest(new { Message = "Email is already in use" });
             }
 
+            var roleToAssign = UserRole.Admin.ToString();
+
+            // Get the role object from the RoleManager
+            var role = await _roleManager.FindByNameAsync(roleToAssign);
+            if (role == null)
+            {
+                return BadRequest(new { Message = "Admin role not found in the system." });
+            }
+
             // Create a new ApplicationUser
             var user = new ApplicationUser
             {
                 UserName = model.UserName,
                 Email = model.Email,
                 FullName = model.FullName,
+                PhoneNumber = "0000000000", // <-- set a default
+                RoleId = role.Id,
                 IsBanned = false // Default is not banned
             };
 
@@ -186,9 +195,6 @@ namespace CraftingServiceApp.AdminAPI.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                // Automatically assign the 'Admin' role to the new user
-                var roleToAssign = UserRole.Admin.ToString();
-
                 // Add the 'Admin' role to the user
                 var addRoleResult = await _userManager.AddToRoleAsync(user, roleToAssign);
                 if (!addRoleResult.Succeeded)

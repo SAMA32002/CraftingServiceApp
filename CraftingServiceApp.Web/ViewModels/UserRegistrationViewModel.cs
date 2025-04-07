@@ -4,7 +4,7 @@ namespace CraftingServiceApp.Web.ViewModels
 {
     public class UserRegistrationViewModel
     {
-        public string Id { get; set; }
+        //public string Id { get; set; }
         [Required]
         [Display(Name = "Full Name")]
         public string FullName { get; set; }
@@ -47,12 +47,12 @@ namespace CraftingServiceApp.Web.ViewModels
         [Required(ErrorMessage = "Postal Code is required")]
         [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Invalid Postal Code format")]
         public string PostalCode { get; set; }
-        public string Country { get; set; }
+        //public string Country { get; set; }
         public bool IsPrimary { get; set; }
 
         public string FullAddress()
         {
-            return $"{Street}, {City}, {PostalCode}, {Country}";
+            return $"{Street}, {City}, {PostalCode}";
         }
     }
 }
