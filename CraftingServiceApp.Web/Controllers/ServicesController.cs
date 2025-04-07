@@ -31,6 +31,7 @@ namespace CraftingServiceApp.Web.Controllers
             _ReviewRepository = reviewRepository;
             _context = context;
         }
+        [HttpGet]
         public async Task<IActionResult> Filter(ServiceFilterViewModel filter)
         {
             var servicesQuery = _context.Services.Include(s => s.Reviews).AsQueryable();
@@ -59,7 +60,13 @@ namespace CraftingServiceApp.Web.Controllers
             };
 
             var services = await servicesQuery.ToListAsync();
-            return View(services);
+            ViewBag.Categories = await _context.Categories
+           .Select(c => new SelectListItem
+           {
+               Text = c.Name,
+               Value = c.Id.ToString()
+           }).ToListAsync();
+            return View("Index", services);
         }
 
         // عرض جميع الخدمات
