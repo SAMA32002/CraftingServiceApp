@@ -1,94 +1,49 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.Domain.Entities;
-using System.Linq;
-using System.Threading.Tasks;
-using CraftingServiceApp.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CraftingServiceApp.Web.Controllers
 {
+    [Authorize(Roles = "Crafter")] // فقط الصنايعي يكتب كومنت
     public class CommentController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IRepository<Comment> _commentRepo;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CommentController(ApplicationDbContext context)
+        public CommentController(IRepository<Comment> commentRepo, UserManager<ApplicationUser> userManager)
         {
-            _context = context;
+            _commentRepo = commentRepo;
+            _userManager = userManager;
         }
 
-        // GET: Comment
-        public async Task<IActionResult> Index()
-        {
-            var comments = await _context.Comments.Include(c => c.Crafter).Include(c => c.Post).ToListAsync();
-            return View(comments);
-        }
-
-        // GET: Comment/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var comment = await _context.Comments.Include(c => c.Crafter).Include(c => c.Post)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (comment == null) return NotFound();
-
-            return View(comment);
-        }
-
-        // GET: Comment/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Comment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CrafterId,PostId,Message")] Comment comment)
+        public async Task<IActionResult> Add(int postId, string message)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(message))
             {
-                _context.Add(comment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                TempData["Error"] = "Comment cannot be empty.";
+                return RedirectToAction("Details", "Post", new { id = postId });
             }
-            return View(comment);
-        }
 
-        // GET: Comment/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment == null) return NotFound();
-
-            return View(comment);
-        }
-
-        // POST: Comment/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CrafterId,PostId,Message")] Comment comment)
-        {
-            if (id != comment.Id) return NotFound();
-
-            if (ModelState.IsValid)
+            var userId = _userManager.GetUserId(User);
+            var comment = new Comment
             {
-                try
-                {
-                    _context.Update(comment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Comments.Any(e => e.Id == comment.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(comment);
+                PostId = postId,
+                CrafterId = userId,
+                Message = message,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _commentRepo.Add(comment);
+            await _commentRepo.SaveAsync();
+
+            // إضافة رسالة نجاح
+            TempData["SuccessMessage"] = "Comment added successfully.";
+
+            return RedirectToAction("Details", "Post", new { id = postId });
         }
     }
 }

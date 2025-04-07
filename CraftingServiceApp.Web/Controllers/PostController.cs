@@ -45,15 +45,19 @@ namespace CraftingServiceApp.Web.Controllers
         // GET: Post/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var post = await _PostRepository.GetByIdAsync(id);
+            var post = await _PostRepository.GetAll()
+                .Include(p => p.Category)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.Crafter)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null) return NotFound();
 
-            // إرسال كل الكاتيجوريز للـ ViewData
             ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
             return View(post);
         }
+
 
         // GET: Post/Create
         public IActionResult Create()
