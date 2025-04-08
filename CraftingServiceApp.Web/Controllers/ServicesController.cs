@@ -87,6 +87,10 @@ namespace CraftingServiceApp.Web.Controllers
         // تفاصيل الخدمة
         public async Task<IActionResult> DetailsAsync(int id)
         {
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+            ViewBag.IsBanned = user.IsBanned;
+
             var service = await _ServiceRepository.GetAll()
                 .Include(s => s.Reviews)
                 .ThenInclude(r => r.Client)

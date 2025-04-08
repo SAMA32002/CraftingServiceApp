@@ -3,12 +3,10 @@
     <section id="services">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                @if (User.IsInRole("Client"))
-                {
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPostModal">
-                        Add Post
-                    </button>
-                }
+            @if (User.IsInRole("Client"))
+            {
+                <button type="button" class="btn btn-primary" onclick="checkBanStatusBeforeAdd()">Add Post</button>
+            }
             </div>
 
             <div class="btn-group" role="group">
@@ -115,29 +113,49 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function () {
+           $(document).ready(function () {
         $("#addPostForm").submit(function (e) {
-            e.preventDefault(); // Prevent full-page refresh
+            e.preventDefault();
 
-            var formData = new FormData(this); // Get form data
+            if (isUserBanned) {
+                alert("You are banned from creating posts!");
+                return false;
+            }
 
+            var formData = new FormData(this);
             $.ajax({
                 type: "POST",
-                url: "/Post/Create", // Submit to controller
+                url: "/Post/Create",
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function (response) {
-                    alert(response.message); // Show success message
-                    $("#addPostModal").modal("hide"); // Close modal
-                    location.reload(); // Refresh the page to show new service
+                    if (response.success) {
+                        window.location.href = response.redirectUrl;
+                    } else {
+                        alert(response.message);
+                    }
                 },
                 error: function (xhr) {
-                    alert("Error: " + xhr.responseText); // Show error
+                    alert("Error: " + xhr.responseText);
                 }
             });
         });
     });
 </script>
+
+<script>
+    var isUserBanned = @((ViewBag.IsBanned != null && ViewBag.IsBanned).ToString().ToLower());
+
+    function checkBanStatusBeforeAdd() {
+        if (isUserBanned) {
+            alert("You are banned from creating posts!");
+        } else {
+            $('#addPostModal').modal('show');
+        }
+    }
+</script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">

@@ -30,6 +30,12 @@ namespace CraftingServiceApp.Web.Controllers
         // GET: Post
         public async Task<IActionResult> Index(int? categoryId)
         {
+            if (User.IsInRole("Client"))
+            {
+                var userId = _userManager.GetUserId(User);
+                var user = await _userManager.FindByIdAsync(userId);
+                ViewBag.IsBanned = user.IsBanned;
+            }
             var posts = await _PostRepository.GetAllAsync();
 
             // إرسال كل الكاتيجوريز للـ ViewData
@@ -90,7 +96,13 @@ namespace CraftingServiceApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Post post)
         {
-            post.ClientId = _userManager.GetUserId(User); // Get current user ID
+            var user = await _userManager.GetUserAsync(User);
+            if (user?.IsBanned == true)
+            {
+                return Json(new { success = false, message = "You are banned from posting." });
+            }
+
+            post.ClientId = _userManager.GetUserId(User);
 
             ModelState.Clear();
             TryValidateModel(post);
@@ -99,13 +111,12 @@ namespace CraftingServiceApp.Web.Controllers
             {
                 _PostRepository.Add(post);
                 await _PostRepository.SaveAsync();
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true, redirectUrl = Url.Action(nameof(Index)) });
             }
 
-            // إعادة تحميل الكاتيجوريز في حالة فشل التحقق من صحة الموديل
-            ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name", post.CategoryId);
-
-            return View(post);
+            // If we got this far, something failed
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return Json(new { success = false, message = "Validation failed", errors });
         }
 
         // GET: Post/Edit/5
@@ -170,6 +181,13 @@ namespace CraftingServiceApp.Web.Controllers
                 await _PostRepository.SaveAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> CheckBanStatus()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            return Json(new { isBanned = user?.IsBanned ?? false });
         }
     }
 }
