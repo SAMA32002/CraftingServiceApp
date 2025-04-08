@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using CraftingServiceApp.BLL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using CraftingServiceApp.Web.ViewModels;
 
 namespace CraftingServiceApp.Web.Controllers
 {
@@ -53,9 +54,24 @@ namespace CraftingServiceApp.Web.Controllers
 
             if (post == null) return NotFound();
 
+            // تحويل البيانات إلى ViewModel
+            var postComments = post.Comments.Select(comment => new CommentViewModel
+            {
+                Message = comment.Message,
+                CrafterId = comment.CrafterId,
+                CrafterName = comment.Crafter?.UserName
+            }).ToList();
+
+            var viewModel = new PostDetailsViewModel
+            {
+                Post = post,
+                ClientId = post.ClientId,
+                Comments = postComments
+            };
+
             ViewData["Categories"] = new SelectList(_CategoRyrepository.GetAll(), "Id", "Name");
 
-            return View(post);
+            return View(viewModel);
         }
 
 
