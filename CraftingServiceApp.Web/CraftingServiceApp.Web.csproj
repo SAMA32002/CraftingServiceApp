@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CraftingServiceApp.AdminAPI\CraftingServiceApp.AdminAPI.csproj" />
     <ProjectReference Include="..\CraftingServiceApp.Application\CraftingServiceApp.BLL.csproj" />
     <ProjectReference Include="..\CraftingServiceApp.Common\CraftingServiceApp.Common.csproj" />
   </ItemGroup>

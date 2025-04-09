@@ -18,7 +18,7 @@ public class TicketService : ITicketService
     public async Task<IEnumerable<TicketDto>> GetAllTicketsAsync()
     {
         return await _context.Tickets
-            .Select(t => new TicketDto { Id = t.Id, Email = t.Email, Subject = t.Subject, Message = t.Message, Status = t.Status })
+            .Select(t => new TicketDto { Id = t.Id, Email = t.Email, Subject = t.Subject, Message = t.Message, Status = t.Status, CreatedAt = t.CreatedAt })
             .ToListAsync();
     }
 
@@ -26,7 +26,7 @@ public class TicketService : ITicketService
     {
         var ticket = await _context.Tickets.FindAsync(id);
         if (ticket == null) return null;
-        return new TicketDto { Id = ticket.Id, Email = ticket.Email, Subject = ticket.Subject, Message = ticket.Message, Status = ticket.Status };
+        return new TicketDto { Id = ticket.Id, Email = ticket.Email, Subject = ticket.Subject, Message = ticket.Message, Status = ticket.Status, CreatedAt = ticket.CreatedAt };
     }
 
     public async Task<TicketDto> CreateTicketAsync(CreateTicketDto ticketDto)

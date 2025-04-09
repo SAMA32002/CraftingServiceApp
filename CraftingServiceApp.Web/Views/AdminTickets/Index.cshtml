@@ -1,0 +1,62 @@
+﻿@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Tickets Management";
+}
+
+<h2>Tickets Management</h2>
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="ticketsTableBody">
+        <tr><td colspan="6">Loading...</td></tr>
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        loadTickets();
+    });
+
+       function loadTickets() {
+        $.ajax({
+            url: "https://localhost:7293/api/ticket",
+            method: "GET",
+            success: function (response) {
+                let tableBody = "";
+                const tickets = response.data;
+
+                if (!tickets || tickets.length === 0) {
+                    tableBody = "<tr><td colspan='6'>No tickets found.</td></tr>";
+                } else {
+                    tickets.forEach(ticket => {
+                        tableBody += `<tr>
+                            <td>${ticket.id}</td>
+                            <td>${ticket.email}</td>
+                            <td>${ticket.subject}</td>
+                            <td>${ticket.status}</td>
+                            <td>${new Date(ticket.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <a href="/AdminTickets/Details?id=${ticket.id}" class="btn btn-sm btn-info">View</a>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                $("#ticketsTableBody").html(tableBody);
+            },
+            error: function (xhr) {
+                console.error("Error fetching tickets:", xhr.responseText);
+                $("#ticketsTableBody").html("<tr><td colspan='6'>Error loading tickets.</td></tr>");
+            }
+        });
+    }
+
+</script>

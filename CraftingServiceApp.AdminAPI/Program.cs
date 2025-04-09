@@ -1,5 +1,7 @@
-﻿using CraftingServiceApp.AdminAPI.Extentions;
+﻿using System.Text.Json.Serialization;
+using CraftingServiceApp.AdminAPI.Extentions;
 using CraftingServiceApp.AdminAPI.Helpers;
+using CraftingServiceApp.AdminAPI.Interfaces;
 using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.BLL.Interfaces;
 using CraftingServiceApp.Domain.Entities;
@@ -38,8 +40,17 @@ builder.Services.AddTransient<EmailService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<CraftingServiceApp.BLL.Interfaces.IPostService, PostService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 
 var app = builder.Build();
 

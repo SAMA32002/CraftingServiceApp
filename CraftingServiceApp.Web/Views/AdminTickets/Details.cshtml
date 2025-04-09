@@ -1,0 +1,74 @@
+﻿@using CraftingServiceApp.Domain.Entities
+@model CraftingServiceApp.AdminAPI.Dtos.TicketDto
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Ticket Details";
+}
+
+<h2>Ticket Details</h2>
+
+@if (Model == null)
+{
+    <div class="alert alert-danger">Ticket not found.</div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <p><strong>ID:</strong> @Model.Id</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Subject:</strong> @Model.Subject</p>
+            <p><strong>Message:</strong> @Model.Message</p>
+            <p><strong>Status:</strong> @Model.Status.ToString()</p>
+            <p><strong>Created:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd")</p>
+
+            @if (Model.Status != TicketStatus.Resolved)
+            {
+                <form id="resolveForm">
+                    <div class="form-group">
+                        <label for="replyMessage">Reply Message</label>
+                        <textarea id="replyMessage" class="form-control" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success mt-2">Send Reply & Resolve</button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-success mt-3">This ticket has already been resolved.</div>
+            }
+
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $("#resolveForm").submit(function (e) {
+            e.preventDefault();
+            const message = $("#replyMessage").val();
+
+            if (!message.trim()) {
+                alert("Please enter a reply message.");
+                return;
+            }
+
+            $.ajax({
+                url: "https://localhost:7293/api/ticket/resolve",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    ticketId: @Model.Id,
+                    message: message
+                }),
+                success: function (data) {
+                    alert(data.message);
+                    location.reload();
+                },
+                error: function (xhr) {
+                    alert("Failed to resolve ticket: " + xhr.responseText);
+                }
+            });
+        });
+    </script>
+}

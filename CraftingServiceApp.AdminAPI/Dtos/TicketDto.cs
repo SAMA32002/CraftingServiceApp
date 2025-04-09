@@ -9,6 +9,7 @@ namespace CraftingServiceApp.AdminAPI.Dtos
         public string Subject { get; set; }
         public string Message { get; set; }
         public TicketStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class CreateTicketDto
