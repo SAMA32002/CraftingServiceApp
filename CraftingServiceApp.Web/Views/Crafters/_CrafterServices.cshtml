@@ -1,0 +1,10 @@
+﻿@model List<CraftingServiceApp.Web.ViewModels.ServiceViewModel>
+
+<div class="list-group">
+    @foreach (var service in Model)
+    {
+        <a href="#" class="list-group-item list-group-item-action" data-service-id="@service.Id" id="service-@service.Id">
+            @service.Title
+        </a>
+    }
+</div>
