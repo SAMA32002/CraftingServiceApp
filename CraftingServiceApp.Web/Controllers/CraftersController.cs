@@ -7,7 +7,8 @@ namespace CraftingServiceApp.Web.Controllers
 {
     public class CraftersController : Controller
     {
-        private IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
+
         public CraftersController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
@@ -15,20 +16,40 @@ namespace CraftingServiceApp.Web.Controllers
 
         public IActionResult Index()
         {
-            // استخدام _context بدل context
             var crafters = _userRepository.GetAll()
-                .Include(x => x.Role) // لو مش Include هيعمل NullReference
+                .Include(x => x.Role)
                 .Where(x => x.Role.Name == "Crafter")
                 .Select(u => new CraftersViewModel
                 {
+                    Id = u.Id, // ✅ تأكد من إضافة الـ Id هنا
                     FullName = u.FullName,
                     PhoneNumber = u.PhoneNumber,
-                    ProfilePic = u.ProfilePic // Use stored profile picture path
+                    ProfilePic = u.ProfilePic
                 })
-               .ToList();
+                .ToList();
 
             return View(crafters);
         }
 
+        // ✅ أكشن صفحة البروفايل
+        public IActionResult Profile(string id)
+        {
+            var crafter = _userRepository.GetAll()
+                .Include(x => x.Role)
+                .Where(x => x.Role.Name == "Crafter" && x.Id == id)
+                .Select(u => new CraftersViewModel
+                {
+                    Id = u.Id,
+                    FullName = u.FullName,
+                    PhoneNumber = u.PhoneNumber,
+                    ProfilePic = u.ProfilePic
+                })
+                .FirstOrDefault();
+
+            if (crafter == null)
+                return NotFound();
+
+            return View(crafter);
+        }
     }
 }

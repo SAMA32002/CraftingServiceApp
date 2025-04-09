@@ -1,6 +1,5 @@
 ﻿@model IEnumerable<CraftingServiceApp.Web.ViewModels.CraftersViewModel>
 
-
 <section id="crafters-list">
     <div class="container mt-4">
         <h2 class="text-start mb-4">Our Crafters</h2>
@@ -11,31 +10,31 @@
                 foreach (var crafter in Model)
                 {
                     <div class="col-md-6 col-lg-4 d-flex">
-                        <div class="card mb-4 crafter-card w-100 shadow-sm">
-                            <div class="row g-0">
-                                <div class="col-12 text-center p-3">
-                                    <img src="@crafter.ProfilePic" class="img-fluid rounded-circle" alt="Profile Picture" style="width: 120px; height: 120px; object-fit: cover;">
-                                </div>
-                                <div class="col-12">
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title mb-2">@crafter.FullName</h5>
-                                        <p class="card-text text-muted mb-3">
-                                            <i class="fas fa-phone me-1"></i> @crafter.PhoneNumber
-                                        </p>
-
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-contact flex-grow-1">
-                                                <i class="fas fa-phone-alt me-1"></i> Contact Info
-                                            </button>
-                                            <button class="btn btn-request flex-grow-1">
-                                                <i class="fas fa-paper-plane me-1"></i> Send Request
-                                            </button>
+                        <a asp-controller="Crafters" asp-action="Profile" asp-route-id="@crafter.Id" class="text-decoration-none text-dark w-100">
+                            <div class="card mb-4 crafter-card w-100 shadow-sm">
+                                <div class="row g-0">
+                                    <div class="col-12 text-center p-3">
+                                        <img src="@crafter.ProfilePic" class="img-fluid rounded-circle" alt="Profile Picture" style="width: 120px; height: 120px; object-fit: cover;">
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title mb-2">@crafter.FullName</h5>
+                                            <p class="card-text text-muted mb-3">
+                                                <i class="fas fa-phone me-1"></i> @crafter.PhoneNumber
+                                            </p>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <span class="btn btn-contact disabled">
+                                                    <i class="fas fa-phone-alt me-1"></i> Contact Info
+                                                </span>
+                                                <span class="btn btn-request disabled">
+                                                    <i class="fas fa-paper-plane me-1"></i> Send Request
+                                                </span>
+                                            </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 }
             }
@@ -49,28 +48,30 @@
             }
         </div>
     </div>
+
     <style>
-        /* زر الاتصال - أزرق */
         .btn-contact {
-            background-color: #2196F3; /* أزرق */
+            background-color: #2196F3;
             color: white;
             border: none;
             transition: 0.3s;
         }
 
-        /* زر الطلب - أخضر */
         .btn-request {
-            background-color: #4CAF50; /* أخضر */
+            background-color: #4CAF50;
             color: white;
             border: none;
             transition: 0.3s;
         }
 
-            /* تأثير عند المرور Hover */
             .btn-contact:hover,
             .btn-request:hover {
                 opacity: 0.9;
-                transform: translateY(-2px); /* حركة بسيطة عند التحويم */
+                transform: translateY(-2px);
             }
+
+        a.text-decoration-none:hover {
+            text-decoration: none;
+        }
     </style>
 </section>
