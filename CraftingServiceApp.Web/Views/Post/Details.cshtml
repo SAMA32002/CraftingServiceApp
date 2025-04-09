@@ -32,9 +32,10 @@
                     {
                         <li class="list-group-item" style="background-color: #f0f8ff;">
                             <strong>
-                                <a asp-controller="Crafters" asp-action="Index" class="text-decoration-underline text-primary">
+                                <a asp-controller="Crafters" asp-action="Profile" asp-route-id="@comment.CrafterId" class="text-decoration-underline text-primary">
                                     <i class="bi bi-person-circle me-1"></i>@comment.CrafterName
                                 </a>
+
                             </strong>: @comment.Message
                         </li>
                     }
