@@ -21,4 +21,10 @@
     <ProjectReference Include="..\CraftingServiceApp.Common\CraftingServiceApp.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\AdminServices\" />
+    <Folder Include="Views\AdminPosts\" />
+    <Folder Include="Views\AdminComments\" />
+  </ItemGroup>
+
 </Project>

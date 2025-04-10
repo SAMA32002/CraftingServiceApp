@@ -2,8 +2,8 @@
 using CraftingServiceApp.AdminAPI.Extentions;
 using CraftingServiceApp.AdminAPI.Helpers;
 using CraftingServiceApp.AdminAPI.Interfaces;
+using CraftingServiceApp.AdminAPI.Services;
 using CraftingServiceApp.Application.Interfaces;
-using CraftingServiceApp.BLL.Interfaces;
 using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -40,9 +40,13 @@ builder.Services.AddTransient<EmailService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<CraftingServiceApp.BLL.Interfaces.IPostService, PostService>();
+builder.Services.AddScoped<CraftingServiceApp.BLL.Interfaces.IPostService, CraftingServiceApp.BLL.Interfaces.PostService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ISliderItemService, SliderItemService>();
+builder.Services.AddScoped<IFileService, FileService>();
+
+
 
 builder.Services
     .AddControllers()

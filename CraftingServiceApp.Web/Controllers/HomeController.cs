@@ -1,6 +1,6 @@
-﻿using CraftingServiceApp.Application.Interfaces;
-using CraftingServiceApp.Infrastructure.Data;
+﻿using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Web.Models;
+using CraftingServiceApp.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -10,30 +10,43 @@ namespace CraftingServiceApp.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IUserRepository _userRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public HomeController(ApplicationDbContext context, IUserRepository userRepository)
+        public HomeController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
-            _userRepository = userRepository;
+            _httpClientFactory = httpClientFactory;
         }
+
 
         // عرض الصفحة الرئيسية مع آخر الخدمات
         public async Task<IActionResult> Index()
         {
-            // بنجيب أحدث 4 خدمات
+            // Fetch recent services
             var recentServices = await _context.Services
                 .Include(s => s.Category)
                 .Include(s => s.Crafter)
                 .OrderByDescending(s => s.Id)
-                .Take(4) // ممكن تغيري العدد اللي يعجبك
+                .Take(4)
                 .ToListAsync();
 
-            // بنرجع البيانات للـ View
-            return View(recentServices);
+            // Fetch active slider images from the API
+            var httpClient = _httpClientFactory.CreateClient();
+            var sliderApiUrl = "https://localhost:7293/api/SliderItem/GetAllSliderItems"; // Update if you have a different route
+            var allSliders = await httpClient.GetFromJsonAsync<List<SliderItemViewModel>>(sliderApiUrl);
+            var activeSliders = allSliders?.Where(s => s.IsActive).ToList() ?? new List<SliderItemViewModel>();
+
+            // Combine both into a single view model
+            var viewModel = new HomePageViewModel
+            {
+                RecentServices = recentServices,
+                ActiveSliders = activeSliders
+            };
+
+            return View(viewModel);
         }
 
-        // EndPoint لو حبيتي تجيبي الخدمات بعدد معين (API/Partial View)
+
         public async Task<IActionResult> RecentService(int count = 4)
         {
             if (count <= 0)

@@ -13,7 +13,7 @@ namespace CraftingServiceApp.AdminAPI.Services
 
         public async Task<string> UploadFileAsync(IFormFile file, string fileType)
         {
-            var uploads = Path.Combine(_env.WebRootPath, "uploads");
+            var uploads = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
             if (!Directory.Exists(uploads))
             {
                 Directory.CreateDirectory(uploads);
