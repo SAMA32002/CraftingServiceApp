@@ -1,4 +1,5 @@
 ﻿using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -42,22 +43,27 @@ namespace CraftingServiceApp.Web.Controllers
         public IActionResult ServiceDetails(int id)
         {
             var service = Context.Services
-                .Where(s => s.Id == id)
-                .Select(s => new ServiceDetailViewModel
-                {
-                    Id = s.Id,
-                    Title = s.Title,
-                    Description = s.Description,
-                    Price = s.Price
-                    // Add any other fields that you want to show in the service details
-                }).FirstOrDefault();
+                .Include(s => s.Reviews)
+                .Include(s => s.Crafter)
+                .Include(s => s.Category)
+                .FirstOrDefault(s => s.Id == id);
 
             if (service == null)
             {
-                return NotFound(); // Or handle error as needed
+                return NotFound();
             }
 
-            return PartialView("ServiceDetails", service);
+            var reviews = service.Reviews ?? new List<Review>();
+            var avgRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+
+            var viewModel = new ServiceDetailsViewModel
+            {
+                Service = service,
+                AverageRating = avgRating,
+                Review = new Review() // optional, if you're using it
+            };
+
+            return PartialView("ServiceDetails", viewModel);
         }
 
         public IActionResult CrafterServices(string id)

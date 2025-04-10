@@ -1,10 +1,38 @@
-﻿@model CraftingServiceApp.Web.ViewModels.ServiceDetailViewModel
+﻿@model CraftingServiceApp.Web.ViewModels.ServiceDetailsViewModel
 
-<div class="card shadow-lg mb-4">
-    <div class="card-body">
-        <h3>@Model.Title</h3>
-        <p>@Model.Description</p>
-        <p><strong>Price: </strong>@Model.Price</p>
-        <!-- Add other service details here -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@Model.Service.Image" class="img-fluid rounded" alt="Service Image" />
+        </div>
+        <div class="col-md-6">
+            <h2>
+                @Model.Service.Title
+            </h2>
+            <span class="text-warning">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="@(i <= Model.AverageRating ? "fas fa-star" : "far fa-star")"></i>
+                }
+                (@Model.AverageRating.ToString("0.0"))
+            </span>
+            <p><strong>Price:</strong>@Model.Service.Price.ToString("F2") EGP</p>
+            <p><strong>Crafter:</strong> @(Model.Service.Crafter?.UserName ?? "Unknown Crafter")</p>
+            <p><strong>Category:</strong> @(Model.Service.Category?.Name ?? "Uncategorized")</p>
+            <p><strong>Description:</strong> @Model.Service.Description</p>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a asp-controller="Request" asp-action="Create" asp-route-serviceId="@Model.Service.Id"
+                   class="btn btn-success mt-3" onclick="checkBanStatusBeforeAdd(event)">
+                    Request Service
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Users" asp-action="Login" class="btn btn-primary mt-3">
+                    Login to Request Service
+                </a>
+            }
+
+        </div>
     </div>
-</div>

@@ -44,18 +44,17 @@
                 });
             });
 
-            // Click on individual service to load details
-            $('.list-group').on('click', 'a[data-service-id]', function (e) {
-                e.preventDefault();
-                var serviceId = $(this).data('service-id');
-                console.log("Service clicked: " + serviceId);
+                  // Delegate to document to catch dynamic service links
+        $(document).on('click', 'a[data-service-id]', function (e) {
+            e.preventDefault();
+            var serviceId = $(this).data('service-id');
+            console.log("Service clicked: " + serviceId);
 
-                $.get('@Url.Action("ServiceDetails", new { id = "__id__" })'.replace('__id__', serviceId), function (data) {
-                    $('#content-area').html(data);
-                    $('.list-group-item').removeClass('active');
-                    $('#services-tab').addClass('active');
-                });
+            $.get('@Url.Action("ServiceDetails", new { id = "__id__" })'.replace('__id__', serviceId), function (data) {
+                $('#content-area').html(data);
             });
+        });
+
         });
     </script>
 }
