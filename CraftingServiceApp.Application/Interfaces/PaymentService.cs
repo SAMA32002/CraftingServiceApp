@@ -4,100 +4,114 @@ using CraftingServiceApp.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Stripe;
 using Microsoft.EntityFrameworkCore;
+using CraftingServiceApp.Domain.DTOs;
+using CraftingServiceApp.Domain.Helper;
+using CraftingServiceApp.Infrastructure.Data;
 
 namespace CraftingServiceApp.Services
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IConfiguration _configuration;
-        private readonly IRepository<Payment> _PaymentRepository;
+        private readonly IConfiguration _config;
+        private readonly ApplicationDbContext _context;
 
-        public PaymentService(IConfiguration configuration, IRepository<Payment> PaymentRepository)
+        public PaymentService(IConfiguration config, ApplicationDbContext context)
         {
-            _configuration = configuration;
-            _PaymentRepository = PaymentRepository;
+            _config = config;
+            _context = context;
+            StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
         }
 
-        public async Task<Payment?> CreateOrUpdatePaymentIntentId(string UserId, int ServiceId, decimal Price)
+        public async Task<ContentContainer<CreatePaymentResponseDto>> CreatePaymentAsync(CreatePaymentRequestDto dto)
         {
-            // Set Stripe API key
-            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(dto.Amount * 100),
+                Currency = "usd",
+                PaymentMethodTypes = new List<string> { "card" },
+            };
 
-            // Here, Price is already provided, so we'll calculate the total amount
-            var amount = (long)(Price * 100); // Convert to cents
-
-            // Create a PaymentIntentService instance
             var service = new PaymentIntentService();
-            PaymentIntent paymentIntent;
+            var paymentIntent = await service.CreateAsync(options);
 
-            // Retrieve existing Payment for the given UserId and ServiceId using Find()
-            var Payment = await _PaymentRepository
-                .Find(up => up.ClientId == UserId && up.ServiceId == ServiceId) // Apply filter with Find()
-                .FirstOrDefaultAsync(); // Use FirstOrDefaultAsync() to retrieve the first result asynchronously
-
-            if (Payment == null) // If no payment exists, create new payment intent
+            var payment = new Payment
             {
-                var options = new PaymentIntentCreateOptions()
-                {
-                    Amount = amount, // Amount in cents
-                    Currency = "usd",
-                    PaymentMethodTypes = new List<string>() { "card" }
-                };
+                ClientId = dto.ClientId,
+                CrafterId = dto.CrafterId,
+                RequestId = dto.RequestId,
+                ServiceId = dto.ServiceId,
+                Amount = dto.Amount,
+                PaymentIntentId = paymentIntent.Id,
+                ClientSecret = paymentIntent.ClientSecret,
+                Status = PaymentStatus.Pending,
+                IsSuccess = false,
+                CreatedAt = DateTime.UtcNow
+            };
 
-                paymentIntent = await service.CreateAsync(options);
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
 
-                // Create a new Payment record
-                Payment = new Payment
-                {
-                    ClientId = UserId,
-                    ServiceId = ServiceId,
-                    PaymentIntentId = paymentIntent.Id,
-                    ClientSecret = paymentIntent.ClientSecret,
-                    Amount = Price,
-                    Status = PaymentStatus.Pending
-                };
-
-                // Save the new Payment entity using the generic repository
-                await _PaymentRepository.AddAsync(Payment);
-                await _PaymentRepository.SaveAsync(); // Save changes to the database
-            }
-            else // If a payment exists, update the payment intent
+            var response = new CreatePaymentResponseDto
             {
-                var options = new PaymentIntentUpdateOptions()
-                {
-                    Amount = amount, // Update amount if needed
-                };
+                PaymentId = payment.Id,
+                PaymentIntentId = payment.PaymentIntentId,
+                ClientSecret = payment.ClientSecret,
+                IsSuccess = true
+            };
 
-                paymentIntent = await service.UpdateAsync(Payment.PaymentIntentId, options);
-
-                Payment.PaymentIntentId = paymentIntent.Id;
-                Payment.ClientSecret = paymentIntent.ClientSecret;
-
-                // Save updated Payment entity
-                _PaymentRepository.Update(Payment); // Mark entity as modified for update
-                await _PaymentRepository.SaveAsync();
-            }
-
-            return Payment;
+            return new ContentContainer<CreatePaymentResponseDto>(response, "Payment created successfully");
         }
 
-        public async Task UpdatePaymentIntentStatus(string PaymentIntentId, bool isSuccess)
+        public async Task<ContentContainer<PaymentDetailsDto>> GetPaymentByIdAsync(int id)
         {
-            // Retrieve the existing payment record by PaymentIntentId
-            var Payment = await _PaymentRepository
-                .Find(up => up.PaymentIntentId == PaymentIntentId)
-                .FirstOrDefaultAsync(); // Find by PaymentId
+            var payment = await _context.Payments.FindAsync(id);
+            if (payment == null)
+                return new ContentContainer<PaymentDetailsDto>(null, "Payment not found");
 
-            if (Payment != null)
+            var dto = new PaymentDetailsDto
             {
-                // Update the payment status based on the result
-                Payment.Status = isSuccess ? PaymentStatus.Completed : PaymentStatus.Failed;
-                Payment.IsSuccess = isSuccess;
+                PaymentId = payment.Id,
+                ClientId = payment.ClientId,
+                CrafterId = payment.CrafterId,
+                Amount = payment.Amount,
+                Status = payment.Status.ToString(),
+                IsSuccess = payment.IsSuccess,
+                CreatedAt = payment.CreatedAt
+            };
 
-                // Save the updated status
-                 _PaymentRepository.Update(Payment);
-                await _PaymentRepository.SaveAsync(); // Save changes to the database
-            }
+            return new ContentContainer<PaymentDetailsDto>(dto, "Payment found");
+        }
+
+        public async Task<ContentContainer<List<PaymentDetailsDto>>> GetAllPaymentsAsync()
+        {
+            var data = await _context.Payments
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new PaymentDetailsDto
+                {
+                    PaymentId = p.Id,
+                    ClientId = p.ClientId,
+                    CrafterId = p.CrafterId,
+                    Amount = p.Amount,
+                    Status = p.Status.ToString(),
+                    IsSuccess = p.IsSuccess,
+                    CreatedAt = p.CreatedAt
+                })
+                .ToListAsync();
+
+            return new ContentContainer<List<PaymentDetailsDto>>(data, "All payments retrieved");
+        }
+
+        public async Task<ContentContainer<string>> UpdatePaymentStatusAsync(int paymentId, PaymentStatus newStatus, bool isSuccess)
+        {
+            var payment = await _context.Payments.FindAsync(paymentId);
+            if (payment == null)
+                return new ContentContainer<string>(null, "Payment not found");
+
+            payment.Status = newStatus;
+            payment.IsSuccess = isSuccess;
+            await _context.SaveChangesAsync();
+
+            return new ContentContainer<string>("Updated", "Status updated successfully");
         }
     }
 }

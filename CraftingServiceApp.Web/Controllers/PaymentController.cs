@@ -1,5 +1,7 @@
 ﻿using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.Domain.DTOs;
 using CraftingServiceApp.Domain.Entities;
+using CraftingServiceApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 
@@ -9,69 +11,51 @@ namespace CraftingServiceApp.Controllers
     public class PaymentController : Controller
     {
         private readonly IPaymentService _paymentService;
-        private readonly IConfiguration _configuration;
-        private readonly IRepository<Payment> _userPaymentRepository;
 
-        // Inject the necessary services
-        public PaymentController(IPaymentService paymentService,
-                                 IConfiguration configuration,
-                                  IRepository<Payment> userPaymentRepository)
+        public PaymentController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
-            _configuration = configuration;
-            _userPaymentRepository = userPaymentRepository;
         }
 
-        // API endpoint to create or update payment intent for a user based on ServiceId and amount
-        [HttpPost("CreateOrUpdatePaymentIntent/{UserId}/{ServiceId}")]
-        public async Task<IActionResult> CreateOrUpdatePaymentIntent(string UserId, int ServiceId, decimal Amount)
+        public async Task<ActionResult> Index()
         {
-            var userPayment = await _paymentService.CreateOrUpdatePaymentIntentId(UserId, ServiceId, Amount);
-            if (userPayment == null)
-            {
-                return BadRequest(new { message = "There is a problem with your payment information!" });
-            }
-
-            // Return the UserPayment with PaymentId and ClientSecret
-            return Ok(new { PaymentId = userPayment.PaymentIntentId, ClientSecret = userPayment.ClientSecret });
+            var result = await _paymentService.GetAllPaymentsAsync();
+            return View(result.Data); // You can also pass the message to ViewBag if needed
         }
 
-        // Stripe Webhook endpoint to handle payment status updates from Stripe
-        [HttpPost("Webhook")]
-        public async Task<IActionResult> StripeWebhook()
+        public async Task<ActionResult> Details(int id)
         {
-            var json = await new System.IO.StreamReader(Request.Body).ReadToEndAsync();
-            var stripeSignature = Request.Headers["Stripe-Signature"];
+            var result = await _paymentService.GetPaymentByIdAsync(id);
+            if (result.Data == null) return NotFound();
 
-            if (string.IsNullOrEmpty(stripeSignature))
-            {
-                return BadRequest(new { message = "Missing Stripe signature" });
-            }
+            return View(result.Data);
+        }
 
-            // Construct the event from the incoming Stripe webhook payload
-            var stripeEvent = Stripe.EventUtility.ConstructEvent(json, stripeSignature, _configuration["StripeSettings:WebhookSecret"]);
+        [HttpGet]
+        public ActionResult Create()
+        {
+            return View();
+        }
 
-            // Handle successful payment
-            if (stripeEvent.Type == "payment_intent.succeeded")
-            {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                if (paymentIntent != null)
-                {
-                    // Update payment status in your repository (assuming the service layer updates the database)
-                    await _paymentService.UpdatePaymentIntentStatus(paymentIntent.Id, true);
-                }
-            }
-            // Handle failed payment
-            else if (stripeEvent.Type == "payment_intent.failed")
-            {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                if (paymentIntent != null)
-                {
-                    await _paymentService.UpdatePaymentIntentStatus(paymentIntent.Id, false);
-                }
-            }
+        [HttpPost]
+        public async Task<ActionResult> Create(CreatePaymentRequestDto dto)
+        {
+            if (!ModelState.IsValid)
+                return View(dto);
 
-            return Ok();
+            var result = await _paymentService.CreatePaymentAsync(dto);
+            if (!result.Data.IsSuccess)
+                ModelState.AddModelError("", result.Message);
+
+            return RedirectToAction("Details", new { id = result.Data.PaymentId });
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateStatus(int id, PaymentStatus status, bool isSuccess)
+        {
+            var result = await _paymentService.UpdatePaymentStatusAsync(id, status, isSuccess);
+            TempData["Message"] = result.Message;
+            return RedirectToAction("Details", new { id });
         }
     }
 }

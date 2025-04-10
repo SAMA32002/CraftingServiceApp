@@ -1,12 +1,16 @@
-﻿using CraftingServiceApp.Domain.Entities;
+﻿using CraftingServiceApp.Domain.DTOs;
+using CraftingServiceApp.Domain.Entities;
+using CraftingServiceApp.Domain.Enums;
+using CraftingServiceApp.Domain.Helper;
 using System.Threading.Tasks;
 
 namespace CraftingServiceApp.Application.Interfaces
 {
     public interface IPaymentService
     {
-      Task<Payment?> CreateOrUpdatePaymentIntentId(string UserId, int ServiceId, decimal Price);
-
-       Task UpdatePaymentIntentStatus(string PaymentIntentId, bool isSuccess);
+        Task<ContentContainer<CreatePaymentResponseDto>> CreatePaymentAsync(CreatePaymentRequestDto dto);
+        Task<ContentContainer<PaymentDetailsDto>> GetPaymentByIdAsync(int id);
+        Task<ContentContainer<List<PaymentDetailsDto>>> GetAllPaymentsAsync();
+        Task<ContentContainer<string>> UpdatePaymentStatusAsync(int paymentId, PaymentStatus newStatus, bool isSuccess);
     }
 }
