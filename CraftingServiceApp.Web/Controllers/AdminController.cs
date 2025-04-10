@@ -60,12 +60,12 @@ namespace CraftingServiceApp.Web.Controllers
             return RedirectToLocal(returnUrl);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
+        [Route("Admin/AdminLogout")]
         public async Task<IActionResult> AdminLogout()
         {
             await HttpContext.SignOutAsync("AdminScheme");
-
+            HttpContext.Response.Cookies.Delete("AdminScheme");
             return RedirectToAction("AdminLogin", "Admin");
         }
 

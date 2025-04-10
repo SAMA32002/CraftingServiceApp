@@ -26,17 +26,24 @@ builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Str
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = "ClientScheme"; // default for clients/crafters
+    options.DefaultScheme = "ClientScheme";
+    options.DefaultSignInScheme = "ClientScheme";
+    options.DefaultChallengeScheme = "ClientScheme";
 })
 .AddCookie("ClientScheme", options =>
 {
-    options.LoginPath = "/Users/Login"; // your existing login
-    options.AccessDeniedPath = "/Users/AccessDenied";
+    options.LoginPath = "/Users/Login";
+    //options.AccessDeniedPath = "/Users/AccessDenied";
+    options.Cookie.Name = "ClientAuthCookie";
 })
 .AddCookie("AdminScheme", options =>
 {
     options.LoginPath = "/Admin/AdminLogin";
-    options.AccessDeniedPath = "/Admin/AccessDenied";
+    options.LogoutPath = "/Admin/AdminLogout";
+    //options.AccessDeniedPath = "/Admin/AccessDenied";
+    options.Cookie.Name = "AdminAuthCookie";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = true;
 });
 
 
