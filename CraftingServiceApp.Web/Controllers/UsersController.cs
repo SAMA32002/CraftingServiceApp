@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Application.Interfaces;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 
 namespace CraftingServiceApp.Web.Controllers
@@ -33,13 +34,13 @@ namespace CraftingServiceApp.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var user = await _userRepository.GetAll()
-                .Include(u => u.Services) 
+                .Include(u => u.Services)
                 .Include(u => u.Addresses)
                 .Include(u => u.SentRequests)
-                .ThenInclude(r => r.Service) 
-                .ThenInclude(s => s.Crafter) 
+                .ThenInclude(r => r.Service)
+                .ThenInclude(s => s.Crafter)
                 .Include(u => u.ReceivedRequests)
-                .ThenInclude(r => r.Client) 
+                .ThenInclude(r => r.Client)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -185,7 +186,7 @@ namespace CraftingServiceApp.Web.Controllers
             // Sign the user in
             await _signInManager.SignInAsync(user, model.RememberMe);
 
-           
+
             // Redirect to home or returnUrl if valid
             return RedirectToLocal(returnUrl);
         }
@@ -313,9 +314,50 @@ namespace CraftingServiceApp.Web.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// /////////////////////////////////////////////////////////////////////
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+
+        [HttpGet]
+        public IActionResult VerifyEmail()
+        {
+            return View();
+        }
+
+        // POST: VerifyEmail
+        [HttpPost]
+        public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);  // Use _userManager to find the user by email
+
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "Something went wrong!");
+                    return View(model);
+                }
+                else
+                {
+                    // Redirecting to ForgotPassword after email verification
+                    return RedirectToAction("ForgotPassword", "Users");
+                }
+            }
+            return View(model);
+        }
 
 
-        //forgot password
+
+        public IActionResult ChangePassword(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return RedirectToAction("VerifyEmail", "Account");
+            }
+            return View(new ChangePasswordViewModel { Email = username });
+        }
         [HttpGet]
         public IActionResult ForgotPassword()
         {
@@ -326,55 +368,87 @@ namespace CraftingServiceApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            if (ModelState.IsValid)
             {
-                // ما تقوليش للمستخدم لو الإيميل مش موجود علشان الأمان
-                return RedirectToAction("ForgotPasswordConfirmation");
-            }
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    // إذا كان البريد الإلكتروني غير موجود، يمكن إظهار رسالة للمستخدم أو العودة إلى نفس الصفحة
+                    ModelState.AddModelError(string.Empty, "No user found with this email address.");
+                    return View(model);
+                }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var callbackUrl = Url.Action("ResetPassword", "Users", new { token, email = model.Email }, Request.Scheme);
+                // هنا يجب إرسال رابط إعادة تعيين كلمة المرور عبر البريد الإلكتروني
+                // يمكنك استخدام _userManager.GeneratePasswordResetTokenAsync و _userManager.SendEmailAsync
 
-            // هنا ممكن تبعتي إيميل فعلي، أو تطبعي الرابط في اللوج
-            Console.WriteLine("Reset link: " + callbackUrl);
-
-            return RedirectToAction("ForgotPasswordConfirmation");
-        }
-        [HttpGet]
-        public IActionResult ResetPassword(string token, string email)
-        {
-            if (token == null || email == null)
-                return RedirectToAction("Index", "Home");
-
-            return View(new ResetPasswordViewModel { Token = token, Email = email });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-                return RedirectToAction("ResetPasswordConfirmation");
-
-            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
-            if (result.Succeeded)
-                return RedirectToAction("ResetPasswordConfirmation");
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
+                return RedirectToAction("PasswordResetSent"); // صفحة توضح للمستخدم أنه تم إرسال رابط إعادة تعيين كلمة المرور.
             }
 
             return View(model);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByNameAsync(model.Email);  // Again, use _userManager
+
+                if (user != null)
+                {
+                    var result = await _userManager.RemovePasswordAsync(user);
+                    if (result.Succeeded)
+                    {
+                        result = await _userManager.AddPasswordAsync(user, model.NewPassword);
+                        return RedirectToAction("Login", "Account");
+                    }
+                    else
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Email not found!");
+                    return View(model);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "Something went wrong. try again.");
+                return View(model);
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                // يمكن توجيه المستخدم إلى صفحة جديدة أو إظهار رسالة تفيد بأن البريد الإلكتروني تم التحقق منه بنجاح
+                return RedirectToAction("EmailConfirmed");
+            }
+
+            // إذا فشل التحقق
+            return RedirectToAction("Error");
+        }
+
 
     }
 }

@@ -1,0 +1,20 @@
+﻿@model CraftingServiceApp.Web.ViewModels.VerifyEmailViewModel
+
+@{
+    ViewData["Title"] = "Verify Email";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <h2 class="text-center">Verify Your Email</h2>
+            <form asp-controller="Users" asp-action="VerifyEmail" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Verify</button>
+            </form>
+        </div>
+    </div>
+</div>
