@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using CraftingServiceApp.Infrastructure.Data;
 using CraftingServiceApp.Application.Interfaces;
 
+
 namespace CraftingServiceApp.Web.Controllers
 {
     public class UsersController : Controller
@@ -309,6 +310,69 @@ namespace CraftingServiceApp.Web.Controllers
             }
 
             ModelState.AddModelError("", "Error updating profile.");
+            return View(model);
+        }
+
+
+
+        //forgot password
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                // ما تقوليش للمستخدم لو الإيميل مش موجود علشان الأمان
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.Action("ResetPassword", "Users", new { token, email = model.Email }, Request.Scheme);
+
+            // هنا ممكن تبعتي إيميل فعلي، أو تطبعي الرابط في اللوج
+            Console.WriteLine("Reset link: " + callbackUrl);
+
+            return RedirectToAction("ForgotPasswordConfirmation");
+        }
+        [HttpGet]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (token == null || email == null)
+                return RedirectToAction("Index", "Home");
+
+            return View(new ResetPasswordViewModel { Token = token, Email = email });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return RedirectToAction("ResetPasswordConfirmation");
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+            if (result.Succeeded)
+                return RedirectToAction("ResetPasswordConfirmation");
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
             return View(model);
         }
 
