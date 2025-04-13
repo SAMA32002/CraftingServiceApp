@@ -380,7 +380,6 @@ namespace CraftingServiceApp.Web.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
@@ -394,13 +393,13 @@ namespace CraftingServiceApp.Web.Controllers
                 ModelState.AddModelError(string.Empty, "User not found.");
                 return View(model);
             }
-
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            var removePass = await _userManager.RemovePasswordAsync(user);
+            var result = await _userManager.AddPasswordAsync(user,model.NewPassword);
 
             if (result.Succeeded)
             {
                 TempData["Message"] = "Password changed successfully!";
-                return RedirectToAction("ChangePassword");
+                return RedirectToAction("Login", "Users");
             }
 
             foreach (var error in result.Errors)
