@@ -330,34 +330,46 @@ namespace CraftingServiceApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> VerifyEmail(VerifyEmailViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(model.Email);  // Use _userManager to find the user by email
-
-                if (user == null)
-                {
-                    ModelState.AddModelError("", "Something went wrong!");
-                    return View(model);
-                }
-                else
-                {
-                    // Redirecting to ForgotPassword after email verification
-                    return RedirectToAction("ForgotPassword", "Users");
-                }
+                return View(model);
             }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Email not found.");
+                return View(model);
+            }
+
+            TempData["VerifiedEmail"] = model.Email;
+            TempData["Message"] = "Please check your email for the verification link.";
+
+            return RedirectToAction("ChangePassword");
+        }
+
+
+
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            var email = TempData["VerifiedEmail"] as string;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                // ممكن ترجعي للمستخدم على صفحة VerifyEmail لو مفيش إيميل
+                return RedirectToAction("VerifyEmail");
+            }
+
+            var model = new ChangePasswordViewModel
+            {
+                Email = email
+            };
+
             return View(model);
         }
 
-
-
-        public IActionResult ChangePassword(string username)
-        {
-            if (string.IsNullOrEmpty(username))
-            {
-                return RedirectToAction("VerifyEmail", "Account");
-            }
-            return View(new ChangePasswordViewModel { Email = username });
-        }
         [HttpGet]
         public IActionResult ForgotPassword()
         {
@@ -389,41 +401,39 @@ namespace CraftingServiceApp.Web.Controllers
 
 
         [HttpPost]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByNameAsync(model.Email);  // Again, use _userManager
-
-                if (user != null)
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
                 {
-                    var result = await _userManager.RemovePasswordAsync(user);
-                    if (result.Succeeded)
-                    {
-                        result = await _userManager.AddPasswordAsync(user, model.NewPassword);
-                        return RedirectToAction("Login", "Account");
-                    }
-                    else
-                    {
-                        foreach (var error in result.Errors)
-                        {
-                            ModelState.AddModelError("", error.Description);
-                        }
-                        return View(model);
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Email not found!");
+                    ModelState.AddModelError("", "User not found.");
                     return View(model);
                 }
+
+                // توليد رمز إعادة تعيين كلمة المرور (رمز مؤقت - يمكن استبداله بمنطق إرسال رمز عبر البريد)
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                var result = await _userManager.ResetPasswordAsync(user, resetToken, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "Password changed successfully.";
+                    return RedirectToAction("Login");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
             }
-            else
-            {
-                ModelState.AddModelError("", "Something went wrong. try again.");
-                return View(model);
-            }
+
+            return View(model);
         }
+
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
