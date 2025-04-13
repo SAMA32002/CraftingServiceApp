@@ -23,7 +23,7 @@ namespace CraftingServiceApp.Web.ViewModels
         public string PhoneNumber { get; set; }
 
         [Display(Name = "Profile Picture")]
-        public IFormFile ProfilePicture { get; set; }
+        public IFormFile? ProfilePicture { get; set; }
 
         public bool IsBanned { get; set; } = false;
 

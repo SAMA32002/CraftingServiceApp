@@ -81,6 +81,11 @@ namespace CraftingServiceApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(UserRegistrationViewModel model)
         {
+            var allowedRoles = new List<string> { "Crafter", "Client" };
+            var roles = await _roleManager.Roles
+                                          .Where(r => allowedRoles.Contains(r.Name))
+                                          .ToListAsync();
+            ViewBag.Roles = new SelectList(roles, "Id", "Name", model.RoleId);
             if (ModelState.IsValid)
             {
                 var role = await _roleManager.FindByIdAsync(model.RoleId);
@@ -112,6 +117,11 @@ namespace CraftingServiceApp.Web.Controllers
                     }
 
                     user.ProfilePic = "/uploads/" + uniqueFileName;
+                }
+                else
+                {
+                    // Assign default picture path
+                    user.ProfilePic = "/uploads/default user image.png";
                 }
 
                 // Add addresses to the user
