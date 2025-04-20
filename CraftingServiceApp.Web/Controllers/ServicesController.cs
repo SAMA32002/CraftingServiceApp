@@ -92,9 +92,12 @@ namespace CraftingServiceApp.Web.Controllers
             ViewBag.IsBanned = user.IsBanned;
 
             var service = await _ServiceRepository.GetAll()
+                .Include(s => s.Crafter)
+                .Include(s => s.Category)
                 .Include(s => s.Reviews)
-                .ThenInclude(r => r.Client)
+                    .ThenInclude(r => r.Client)
                 .FirstOrDefaultAsync(s => s.Id == id);
+
 
             if (service == null)
                 return BadRequest();
@@ -117,7 +120,19 @@ namespace CraftingServiceApp.Web.Controllers
         [Authorize]
         public async Task<IActionResult> AddReview(Review review)
         {
-            review.ClientId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User);
+            review.ClientId = userId;
+
+            // Check if the user already reviewed this service
+            var hasReviewed = _ReviewRepository
+                                .GetAll()
+                                .Any(r => r.ServiceId == review.ServiceId && r.ClientId == userId);
+
+            if (hasReviewed)
+            {
+                TempData["ReviewError"] = "You have already submitted a review for this service.";
+                return RedirectToAction("Details", new { id = review.ServiceId });
+            }
 
             ModelState.Clear();
             TryValidateModel(review);
@@ -129,6 +144,8 @@ namespace CraftingServiceApp.Web.Controllers
 
             _ReviewRepository.Add(review);
             _ReviewRepository.SaveChanges();
+
+            TempData["ReviewSuccess"] = "Your review has been submitted!";
 
             return RedirectToAction("Details", new { id = review.ServiceId });
         }

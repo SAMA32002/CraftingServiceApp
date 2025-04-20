@@ -1,5 +1,15 @@
 ﻿@model CraftingServiceApp.Web.ViewModels.ServiceDetailsViewModel
 
+@if (TempData["ReviewError"] != null)
+{
+    <div class="alert alert-danger">@TempData["ReviewError"]</div>
+}
+@if (TempData["ReviewSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["ReviewSuccess"]</div>
+}
+
+
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-6">
@@ -66,22 +76,33 @@
 
     @if (User.Identity.IsAuthenticated)
     {
-        <h3>Leave a Review</h3>
-        <form asp-action="AddReview" method="post">
-            <input type="hidden" name="ServiceId" value="@Model.Service.Id" />
-            <textarea name="Comment" class="form-control" placeholder="Write your review..." required></textarea>
-            <div class="mt-2">
-                <label>Rating:</label>
-                <select name="Rating" class="form-control w-25">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        <option value="@i">@i Stars</option>
-                    }
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
-        </form>
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var alreadyReviewed = Model.Service.Reviews.Any(r => r.ClientId == userId);
+
+        if (!alreadyReviewed)
+        {
+            <h3>Leave a Review</h3>
+            <form asp-action="AddReview" method="post">
+                <input type="hidden" name="ServiceId" value="@Model.Service.Id" />
+                <textarea name="Comment" class="form-control" placeholder="Write your review..." required></textarea>
+                <div class="mt-2">
+                    <label>Rating:</label>
+                    <select name="Rating" class="form-control w-25">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <option value="@i">@i Stars</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-muted">You have already submitted a review for this service.</p>
+        }
     }
+
 </div>
 
 
