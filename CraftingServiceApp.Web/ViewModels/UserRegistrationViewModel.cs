@@ -39,17 +39,15 @@ namespace CraftingServiceApp.Web.ViewModels
         [Required(ErrorMessage = "Street is required")]
         [StringLength(100, ErrorMessage = "Street cannot exceed 100 characters")]
         public string Street { get; set; }
-
         [Required(ErrorMessage = "City is required")]
         [StringLength(50, ErrorMessage = "City cannot exceed 50 characters")]
         public string City { get; set; }
-
         [Required(ErrorMessage = "Postal Code is required")]
         [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Invalid Postal Code format")]
         public string PostalCode { get; set; }
         //public string Country { get; set; }
         public bool IsPrimary { get; set; }
-
+        public bool IsDeleted { get; set; }
         public string FullAddress()
         {
             return $"{Street}, {City}, {PostalCode}";

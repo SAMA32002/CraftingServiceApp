@@ -61,7 +61,7 @@ namespace CraftingServiceApp.Web.Controllers
                 ReceivedRequests = user.ReceivedRequests?.ToList() ?? new List<Request>(),
                 SentRequests = user.SentRequests?.ToList() ?? new List<Request>(),
                 Posts = _context.Posts.Where(p => p.ClientId == userId).ToList(),
-                Addresses = user.Addresses?.ToList() ?? new List<Address>()
+                Addresses = user.Addresses.Where(a => a.IsPrimary == true)?.ToList() ?? new List<Address>()
             };
 
             return View(viewModel);
@@ -239,14 +239,16 @@ namespace CraftingServiceApp.Web.Controllers
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 ExistingProfilePicture = user.ProfilePic,
-                Addresses = user.Addresses.Select(a => new AddressViewModel
+                Addresses = user.Addresses
+                .Where(a => !a.IsDeleted)
+                .Select(a => new AddressViewModel
                 {
                     Id = a.Id,
                     Street = a.Street,
                     City = a.City,
                     PostalCode = a.PostalCode,
-                    //Country = a.Country,
-                    IsPrimary = false,
+                    IsPrimary = a.IsPrimary,
+                    IsDeleted = a.IsDeleted,
                 }).ToList()
             };
 
