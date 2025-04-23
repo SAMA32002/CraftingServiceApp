@@ -26,5 +26,8 @@ namespace CraftingServiceApp.Domain.Entities
         public virtual ICollection<Request> ReceivedRequests { get; set; } = new List<Request>();
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
+        public virtual ICollection<Payment> PaymentsAsClient { get; set; }
+        public virtual ICollection<Payment> PaymentsAsCrafter { get; set; }
+
     }
 }

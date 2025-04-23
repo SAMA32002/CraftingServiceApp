@@ -25,150 +25,151 @@ namespace CraftingServiceApp.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
-            // User has Services (Crafter)
+            // User Relationships
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Services)
                 .WithOne(s => s.Crafter)
                 .HasForeignKey(s => s.CrafterId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // User has Posts (Client)
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Posts)
                 .WithOne(p => p.Client)
                 .HasForeignKey(p => p.ClientId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.PaymentsAsClient)
+                .WithOne(p => p.Client)
+                .HasForeignKey(p => p.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.PaymentsAsCrafter)
+                .WithOne(p => p.Crafter)
+                .HasForeignKey(p => p.CrafterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Identity Relationship
             builder.Entity<IdentityUserRole<string>>()
                 .HasOne<IdentityRole>()
                 .WithMany()
                 .HasForeignKey(ur => ur.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Service & Category Relationship
+            // Service Relationships
             builder.Entity<Service>()
                 .HasOne(s => s.Category)
                 .WithMany(c => c.Services)
                 .HasForeignKey(s => s.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Set precision for Service.Price
             builder.Entity<Service>()
                 .Property(s => s.Price)
                 .HasPrecision(18, 4);
 
-            // Post & Category Relationship
+            // Post Relationship
             builder.Entity<Post>()
                 .HasOne(p => p.Category)
                 .WithMany()
                 .HasForeignKey(p => p.CategoryId);
 
-            // Prevent Cascade Delete for Comment → Post
+            // Comment Relationships
             builder.Entity<Comment>()
                 .HasOne(c => c.Post)
                 .WithMany(p => p.Comments)
                 .HasForeignKey(c => c.PostId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Prevent Cascade Delete for Comment → Crafter
             builder.Entity<Comment>()
                 .HasOne(c => c.Crafter)
                 .WithMany()
                 .HasForeignKey(c => c.CrafterId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Client & Address Relationship
+            // Address Relationships
             builder.Entity<Address>()
                 .HasOne(a => a.Client)
                 .WithMany(u => u.Addresses)
                 .HasForeignKey(a => a.ClientId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Explicitly define foreign key for Review → Service
+            // Review Relationships
             builder.Entity<Review>()
                 .HasOne(r => r.Service)
                 .WithMany(s => s.Reviews)
                 .HasForeignKey(r => r.ServiceId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Explicitly define foreign key for Review → Client
             builder.Entity<Review>()
                 .HasOne(r => r.Client)
                 .WithMany()
                 .HasForeignKey(r => r.ClientId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Set precision for Payment.Amount
+            // Payment Configuration
             builder.Entity<Payment>()
                 .Property(p => p.Amount)
-                .HasPrecision(18, 4);
+                .HasPrecision(18, 2);
 
-            // Relationship: Payment → Request (Instead of Service)
             builder.Entity<Payment>()
-                .HasOne<Request>()
-                .WithMany()
-                .HasForeignKey(up => up.RequestId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .Property(p => p.Status)
+                .HasConversion<string>();
 
-            // Relationship: Request → Client
+            builder.Entity<Payment>()
+                .HasOne(p => p.Request)
+                .WithOne(r => r.Payment)
+                .HasForeignKey<Payment>(p => p.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Payment>()
+                .HasIndex(p => p.StripePaymentIntentId)
+                .IsUnique();
+
+            builder.Entity<Payment>()
+                .HasIndex(p => p.Status);
+
+            // Request Relationships
             builder.Entity<Request>()
                 .HasOne(r => r.Client)
                 .WithMany(u => u.SentRequests)
                 .HasForeignKey(r => r.ClientId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relationship: Request → Service
             builder.Entity<Request>()
                 .HasOne(r => r.Service)
                 .WithMany(s => s.Requests)
                 .HasForeignKey(r => r.ServiceId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relationship: Request → RequestSchedule (One-to-One)
             builder.Entity<Request>()
                 .HasOne(r => r.SelectedSchedule)
                 .WithOne()
                 .HasForeignKey<Request>(r => r.SelectedScheduleId)
-                .OnDelete(DeleteBehavior.NoAction); // Prevent cascading issues
-
-            builder.Entity<Request>()
-                .HasOne(r => r.Payment)
-                .WithOne(p => p.Request) // Explicitly set navigation
-                .HasForeignKey<Request>(r => r.PaymentId)
-                .OnDelete(DeleteBehavior.SetNull); // Keep request if payment is deleted
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Request>()
                 .HasOne(r => r.SelectedAddress)
                 .WithMany()
                 .HasForeignKey(r => r.SelectedAddressId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
-
-            builder.Entity<Address>()
-                .HasOne(a => a.Client)
-                .WithMany(u => u.Addresses)
-                .HasForeignKey(a => a.ClientId)
-                .OnDelete(DeleteBehavior.Cascade); // Delete addresses if client is removed
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Request>()
                 .Property(r => r.Status)
-                .HasConversion<string>(); // Stores enum as string
+                .HasConversion<string>();
 
             builder.Entity<Request>()
-                .Property(r => r.PaymentStatus)
-                .HasConversion<string>(); // Stores enum as string
-
-            builder.Entity<RequestSchedule>()
-                .HasOne(rs => rs.Request)
-                .WithMany(r => r.ProposedDates)
+                .HasMany(r => r.ProposedDates)
+                .WithOne(rs => rs.Request)
                 .HasForeignKey(rs => rs.RequestId)
-                .OnDelete(DeleteBehavior.Cascade); // Automatically remove schedules when the request is deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Notification Relationship
             builder.Entity<Notification>()
                 .HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 }

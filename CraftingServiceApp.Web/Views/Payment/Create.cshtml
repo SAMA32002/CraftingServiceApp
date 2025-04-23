@@ -1,0 +1,44 @@
+﻿@model CraftingServiceApp.Web.ViewModels.PaymentViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Complete Your Payment</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Service Details</h5>
+                            <p class="mb-1"><strong>Service:</strong> @Model.ServiceName</p>
+                            <p class="mb-1"><strong>Request ID:</strong> @Model.RequestId</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h5>Payment Summary</h5>
+                            <p class="mb-1">
+                                <strong>Amount Due:</strong> @Model.Amount.ToString("C", new System.Globalization.CultureInfo("ar-EG"))
+                            </p>
+                        </div>
+                    </div>
+
+                    <form asp-action="Create" method="post">
+                        <input type="hidden" asp-for="RequestId" />
+                        <input type="hidden" asp-for="Amount" />
+                        <input type="hidden" asp-for="ServiceName" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-credit-card"></i> Proceed to Payment
+                            </button>
+                            <a asp-controller="Request" asp-action="Details" asp-route-id="@Model.RequestId"
+                               class="btn btn-outline-secondary">
+                                Back to Request Details
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

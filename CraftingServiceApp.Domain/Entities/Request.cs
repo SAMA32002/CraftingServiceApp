@@ -27,16 +27,19 @@ namespace CraftingServiceApp.Domain.Entities
 
         // 📅 Stores the final confirmed appointment date
         public DateTime? ScheduledDateTime { get; set; }
+        public List<RequestSchedule> ProposedDates { get; set; } = new();
 
         [StringLength(500)]
         public string? Notes { get; set; }
 
         public int? PaymentId { get; set; }
         public Payment Payment { get; set; }
+        public decimal TotalAmount { get; set; } // Added to store the payment amount
 
-        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
-
-        public List<RequestSchedule> ProposedDates { get; set; } = new();
+        // Status flags for payment workflow
+        public bool IsApproved { get; set; } = false; // Added for crafter approval
+        public bool IsCompleted { get; set; } = false; // Added for completion status
+        public bool IsDisputed { get; set; } = false; // Added for dispute tracking
 
         // ✅ New Fields for Address Selection
         public int? SelectedAddressId { get; set; } // If they use a saved address
@@ -46,7 +49,8 @@ namespace CraftingServiceApp.Domain.Entities
         public string? CustomCity { get; set; }
         public string? CustomPostalCode { get; set; }
         public string? CustomCountry { get; set; }
-
-        public string? PaymentIntentId { get; set; }
+        // Stripe payment identifiers
+        public string? PaymentIntentId { get; set; } // Kept for backward compatibility
+        public string? StripeClientSecret { get; set; } // Added for client-side payment processing
     }
 }

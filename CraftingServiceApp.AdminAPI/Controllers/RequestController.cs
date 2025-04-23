@@ -42,7 +42,7 @@ namespace CraftingServiceApp.AdminAPI.Controllers
                 SelectedScheduleId = r.SelectedScheduleId,  // Only the ID
                 ScheduledDateTime = r.ScheduledDateTime,
                 Notes = r.Notes,
-                PaymentStatus = r.PaymentStatus.ToString(),  // Use enum value as a string (optional)
+                //PaymentStatus = r.PaymentStatus.ToString(),  // Use enum value as a string (optional)
                 ProposedDates = r.ProposedDates.Select(ps => ps.Id).ToList(),  // List of IDs
                 SelectedAddressId = r.SelectedAddressId,  // Only the ID
                 PaymentIntentId = r.PaymentIntentId

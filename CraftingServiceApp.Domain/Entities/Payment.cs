@@ -6,21 +6,23 @@ namespace CraftingServiceApp.Domain.Entities
     public class Payment
     {
         public int Id { get; set; }
-        public string ClientId { get; set; } // The paying client
-        public string CrafterId { get; set; } // The crafter receiving the payment
-        public int RequestId { get; set; }
-        public Request Request { get; set; }
-
-        public int ServiceId { get; set; }  // The purchased service
-        public decimal Amount { get; set; } // Payment amount
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        // 🔗 Stripe Payment Intent Details
-        public string? PaymentIntentId { get; set; } // Stores Stripe's Payment ID
-        public string? ClientSecret { get; set; } // Stores Stripe’s ClientSecret
-
+        public string StripePaymentIntentId { get; set; }
+        public string StripeClientSecret { get; set; }
+        public decimal Amount { get; set; }
+        public string Currency { get; set; } = "USD";
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
-        public bool IsSuccess { get; set; } = false; // Tracks if payment was successful
-    }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ReleasedAt { get; set; }
+        public DateTime? DisputedAt { get; set; }
 
+        // Foreign keys
+        public int RequestId { get; set; }
+        public string ClientId { get; set; }
+        public string CrafterId { get; set; }
+
+        // Navigation properties
+        public Request Request { get; set; }
+        public ApplicationUser Client { get; set; }
+        public ApplicationUser Crafter { get; set; }
+    }    
 }

@@ -1,9 +1,10 @@
 using CraftingServiceApp.Application.Interfaces;
 using CraftingServiceApp.BLL.Interfaces;
+using CraftingServiceApp.BLL.Services;
 using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Infrastructure.Data;
-using CraftingServiceApp.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,13 +17,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<ICustomEmailSender, CustomEmailSender>();
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.AddScoped<IStripeService, StripeService>();
 
 builder.Services.AddAuthentication(options =>
 {

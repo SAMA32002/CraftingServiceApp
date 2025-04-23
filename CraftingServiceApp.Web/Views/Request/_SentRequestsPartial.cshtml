@@ -47,11 +47,20 @@ else
                                     Cancel
                                 </a>
                             }
-                            else if (request.Status == RequestStatus.Accepted && request.PaymentStatus == PaymentStatus.Pending)
+                            else
                             {
-                                <a href="@Url.Action("Payment", "Request", new { requestId = request.Id })" class="btn btn-sm btn-primary">
-                                    Proceed to Payment
-                                </a>
+                                @if (request.PaymentId != null)
+                                {
+                                    <span class="badge bg-success">Paid</span>
+                                }
+                                else if (request.IsApproved && request.Status == RequestStatus.Accepted)
+                                {
+                                    <a asp-action="Create" asp-controller="Payment"
+                                       asp-route-requestId="@request.Id"
+                                       class="btn btn-primary btn-sm">
+                                        Complete Payment
+                                    </a>
+                                }
                             }
                         </td>
 

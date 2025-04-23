@@ -1,0 +1,119 @@
+﻿@model CraftingServiceApp.Web.ViewModels.ProcessPaymentViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Secure Payment</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i> You're paying <strong>
+                            @Model.Amount.ToString("C", new System.Globalization.CultureInfo("ar-EG"))
+                        </strong> for request #@Model.RequestId
+                    </div>
+
+                    <form id="payment-form" class="mb-3">
+                        <div id="card-element" class="form-control p-2" style="height: 50px;"></div>
+                        <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+
+                        <div class="d-grid mt-4">
+                            <button id="submit-button" class="btn btn-primary btn-lg">
+                                <span id="button-text">Pay Now</span>
+                                <span id="payment-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stripe = Stripe('@ViewBag.StripePublishableKey');
+            const elements = stripe.elements();
+            const card = elements.create('card');
+            card.mount('#card-element');
+
+            const form = document.getElementById('payment-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                console.log('1. Form submission started');
+
+                // UI Loading state
+                const submitButton = document.getElementById('submit-button');
+                submitButton.disabled = true;
+                document.getElementById('payment-spinner').classList.remove('d-none');
+                document.getElementById('card-errors').textContent = '';
+
+                try {
+                    console.log('2. Calling confirmCardPayment with:', '@Model.ClientSecret');
+
+                    const result = await stripe.confirmCardPayment('@Model.ClientSecret', {
+                        payment_method: { card: card }
+                    });
+
+                    console.log("3. PaymentIntent status:", result.paymentIntent?.status);
+
+                    // LOCAL DEVELOPMENT OVERRIDE
+                    const isLocal = window.location.hostname === 'localhost' ||
+                                  window.location.hostname === '127.0.0.1';
+
+                    if (isLocal && result.paymentIntent) {
+                        console.log('4. Local development - simulating webhook');
+                        try {
+                            await fetch(`/Payment/SimulateWebhook?paymentId=@Model.PaymentId`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                                }
+                            });
+                            window.location.href = '@Url.Action("Success", "Payment", new { paymentId = Model.PaymentId })';
+                            return;
+                        } catch (err) {
+                            console.error('Local simulation failed:', err);
+                        }
+                    }
+
+                    // PRODUCTION FLOW
+                    if (result.error) {
+                        console.error('5. Payment failed:', result.error);
+                        document.getElementById('card-errors').textContent = result.error.message;
+                    }
+                    else if (result.paymentIntent.status === 'succeeded') {
+                        console.log('6. Payment succeeded, redirecting...');
+                        window.location.href = '@Url.Action("Success", "Payment", new { paymentId = Model.PaymentId })';
+                    }
+                    else if (result.paymentIntent.status === 'requires_action') {
+                        console.log('7. 3D Secure required');
+                        const { error: confirmError } = await stripe.confirmCardPayment('@Model.ClientSecret');
+                        if (confirmError) {
+                            document.getElementById('card-errors').textContent = confirmError.message;
+                        } else {
+                            window.location.href = '@Url.Action("Success", "Payment", new { paymentId = Model.PaymentId })';
+                        }
+                    }
+                    else {
+                        console.warn('8. Unexpected status:', result.paymentIntent.status);
+                        document.getElementById('card-errors').textContent =
+                            "Payment is processing. We'll notify you when completed.";
+                    }
+                } catch (err) {
+                    console.error('9. Unexpected error:', err);
+                    document.getElementById('card-errors').textContent =
+                        'Payment processing failed. Please try again.';
+                } finally {
+                    console.log('10. Resetting UI');
+                    submitButton.disabled = false;
+                    document.getElementById('payment-spinner').classList.add('d-none');
+                }
+            });
+        });
+    </script>
+}

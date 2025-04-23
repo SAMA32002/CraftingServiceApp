@@ -1,20 +1,24 @@
-﻿using CraftingServiceApp.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CraftingServiceApp.Web.ViewModels
 {
     public class PaymentViewModel
     {
-        public int RequestId { get; set; } 
-        public string ClientId { get; set; } 
-        public string CrafterId { get; set; } 
-        public string PaymentIntentId { get; set; } 
-        public string ClientSecret { get; set; } 
-        public decimal Amount { get; set; } 
-        public string Currency { get; set; } = "EGP"; 
-        public PaymentStatus PaymentStatus { get; set; }
-        public int ServiceId { get; set; }
-        public string ServiceTitle { get; set; }
-        public string PublishableKey { get; set; }
+        public int PaymentId { get; set; }
+        public int RequestId { get; set; }
+
+        [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
+        public decimal Amount { get; set; }
+
+        public string ServiceName { get; set; }
     }
 
+    public class ProcessPaymentViewModel
+    {
+        public int PaymentId { get; set; }
+        public string ClientSecret { get; set; }
+        public decimal Amount { get; set; }
+        public int RequestId { get; set; }
+    }
 }

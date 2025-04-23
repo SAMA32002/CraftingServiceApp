@@ -11,5 +11,6 @@ namespace CraftingServiceApp.Domain.Enums
         Completed = 5,  // Service finished
         Expired = 6,    // Crafter didn't confirm in time
         Refunded = 7,   // Client requests a refund
+        Disputed = 8,
     }
 }

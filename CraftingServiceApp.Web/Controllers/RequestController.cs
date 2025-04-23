@@ -1,4 +1,7 @@
-﻿using CraftingServiceApp.Application.Interfaces;
+﻿using System.Security.Claims;
+using CraftingServiceApp.Application.Interfaces;
+using CraftingServiceApp.BLL.Interfaces;
+using CraftingServiceApp.BLL.Services;
 using CraftingServiceApp.Domain.Entities;
 using CraftingServiceApp.Domain.Enums;
 using CraftingServiceApp.Infrastructure.Data;
@@ -22,8 +25,11 @@ namespace CraftingServiceApp.Web.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IOptions<StripeSettings> _stripeSettings;
+        private readonly ICustomEmailSender _emailSender;
+        private readonly ILogger<RequestController> _logger;
+        private readonly IStripeService _stripeService;
 
-        public RequestController(IRepository<Request> requestRepository, IRepository<Domain.Entities.Address> addressRepository, IRepository<Domain.Entities.Service> serviceRepository, IRepository<Notification> notificationRepository, ApplicationDbContext context, UserManager<ApplicationUser> userManager, IOptions<StripeSettings> stripeSettings)
+        public RequestController(IRepository<Request> requestRepository, IRepository<Domain.Entities.Address> addressRepository, IRepository<Domain.Entities.Service> serviceRepository, IRepository<Notification> notificationRepository, ApplicationDbContext context, UserManager<ApplicationUser> userManager, IOptions<StripeSettings> stripeSettings, ICustomEmailSender emailSender, ILogger<RequestController> logger, IStripeService stripeService)
         {
             _requestRepository = requestRepository;
             _addressRepository = addressRepository;
@@ -32,8 +38,10 @@ namespace CraftingServiceApp.Web.Controllers
             _context = context;
             _userManager = userManager;
             _stripeSettings = stripeSettings;
+            _emailSender = emailSender;
+            _logger = logger;
+            _stripeService = stripeService;
         }
-
 
         // GET: Request/Create
         public async Task<IActionResult> Create(int serviceId)
@@ -221,14 +229,17 @@ namespace CraftingServiceApp.Web.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Crafter")]
         public async Task<IActionResult> AcceptRequest(int requestId, int selectedScheduleId)
         {
             var request = await _requestRepository.GetAll()
                 .Include(r => r.Service)
+                    .ThenInclude(s => s.Crafter)
+                .Include(r => r.Client)
                 .Include(r => r.ProposedDates)
                 .FirstOrDefaultAsync(r => r.Id == requestId);
 
-            if (request == null)
+            if (request == null || request.Service?.CrafterId != User.FindFirstValue(ClaimTypes.NameIdentifier))
             {
                 return NotFound();
             }
@@ -239,38 +250,20 @@ namespace CraftingServiceApp.Web.Controllers
                 return BadRequest("Invalid schedule selection.");
             }
 
-            // Assign selected schedule and confirm request
+            // Update request status
             request.SelectedScheduleId = selectedScheduleId;
             request.Status = RequestStatus.Accepted;
             request.ScheduledDateTime = selectedSchedule.ProposedDate;
-
-            StripeConfiguration.ApiKey = _stripeSettings.Value.SecretKey;
-            var paymentIntentService = new PaymentIntentService();
-
-            var servicePrice = request.Service.Price * 100; // Convert EGP to piasters
-            var paymentIntent = await paymentIntentService.CreateAsync(new PaymentIntentCreateOptions
-            {
-                Amount = (long)servicePrice,
-                Currency = "egp",
-                PaymentMethodTypes = new List<string> { "card" },
-                CaptureMethod = "manual", // Escrow-based approach
-                Metadata = new Dictionary<string, string>
-        {
-            { "RequestId", request.Id.ToString() },
-            { "ClientId", request.ClientId }
-        }
-            });
-
-            request.PaymentIntentId = paymentIntent.Id;
-            request.PaymentStatus = PaymentStatus.Pending;
-
+            request.TotalAmount = request.Service.Price;
+            request.IsApproved = true; // Flag for payment workflow
             await _requestRepository.SaveAsync();
 
-            // Notify Client
+            // Create notification without link
             var notification = new Notification
             {
                 UserId = request.ClientId,
-                Message = $"Your request for {request.Service?.Title} has been accepted. Please proceed with payment.",
+                Message = $"Your request for {request.Service?.Title} has been accepted. " +
+                         "Please visit your requests to complete payment.",
                 CreatedAt = DateTime.UtcNow,
                 IsRead = false
             };
@@ -304,109 +297,86 @@ namespace CraftingServiceApp.Web.Controllers
             return RedirectToAction(nameof(ReceivedRequests));
         }
 
-        public async Task<IActionResult> Payment(int requestId)
+        [HttpPost]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> MarkAsCompleted(int requestId)
         {
-            var request = await _requestRepository.GetByIdAsync(requestId);
-            if (request == null || request.Status != RequestStatus.Accepted)
+            var request = await _context.Requests
+                .Include(r => r.Payment)
+                .Include(r => r.Service)
+                    .ThenInclude(s => s.Crafter) // Get crafter through service
+                .Include(r => r.Client)
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+
+            if (request == null || request.Payment == null || request.Service?.Crafter == null)
             {
                 return NotFound();
             }
 
-            var service = await _serviceRepository.GetByIdAsync(request.ServiceId); // Fetch Service
-
-            var viewModel = new PaymentViewModel
+            try
             {
-                RequestId = requestId,
-                ClientId = request.ClientId,
-                CrafterId = request.Service.CrafterId, 
-                ServiceId = request.ServiceId,
-                ServiceTitle = service?.Title ?? "Unknown Service",
-                Amount = request.Service.Price,
-                PaymentIntentId = request.Payment?.PaymentIntentId,
-                ClientSecret = request.Payment?.ClientSecret, 
-                Currency = "EGP",
-                PaymentStatus = request.PaymentStatus,
-                PublishableKey = _stripeSettings.Value.PublishableKey 
-            };
+                request.IsCompleted = true;
 
-            return View(viewModel);
-        }
+                if (request.Payment.Status == PaymentStatus.Held)
+                {
+                    await _stripeService.CapturePaymentAsync(request.Payment.StripePaymentIntentId);
+                    request.Payment.Status = PaymentStatus.Released;
+                    request.Payment.ReleasedAt = DateTime.UtcNow;
+                }
 
-        public async Task<IActionResult> PaymentSuccess(int requestId)
-        {
-            var request = await _requestRepository.GetByIdAsync(requestId);
-            if (request == null) return NotFound();
+                await _context.SaveChangesAsync();
 
-            request.Status = RequestStatus.Paid;
-            _requestRepository.Update(request);
-            await _requestRepository.SaveAsync();
+                // Notify client
+                await _emailSender.SendRequestCompletedNotificationAsync(request.ClientId, request.Id);
 
-            var notification = new Notification
+                // Notify crafter (through service)
+                await _emailSender.SendEmailAsync(
+                    request.Service.Crafter.Email,
+                    "Payment Released",
+                    $"Your payment of {request.Payment.Amount} for {request.Service.Title} has been released.");
+
+                return RedirectToAction("Details", new { id = requestId });
+            }
+            catch (Exception ex)
             {
-                UserId = request.Service.CrafterId,
-                Message = $"Client has completed payment for {request.Service.Title}.",
-                CreatedAt = DateTime.UtcNow,
-                IsRead = false
-            };
-            _notificationRepository.Add(notification);
-            await _notificationRepository.SaveAsync();
-
-            return View();
+                _logger.LogError(ex, "Error marking request {RequestId} as completed", requestId);
+                return RedirectToAction("Details", new { id = requestId, error = "Failed to complete request" });
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CompleteRequest(int requestId)
+        [Authorize]
+        public async Task<IActionResult> DisputeRequest(int requestId)
         {
-            var request = await _requestRepository.GetByIdAsync(requestId);
-            if (request == null || request.Status != RequestStatus.Paid)
+            var request = await _context.Requests
+                .Include(r => r.Service)
+                .Include(r => r.Payment)
+                .FirstOrDefaultAsync(r => r.Id == requestId && r.ClientId == User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (request == null)
             {
                 return NotFound();
             }
 
-            StripeConfiguration.ApiKey = _stripeSettings.Value.SecretKey;
-            var paymentIntentService = new PaymentIntentService();
-            await paymentIntentService.CaptureAsync(request.PaymentIntentId);
+            request.IsDisputed = true;
 
-            request.Status = RequestStatus.Completed;
-            _requestRepository.Update(request);
-            await _requestRepository.SaveAsync();
-
-            var notification = new Notification
+            if (request.Payment?.Status == PaymentStatus.Held)
             {
-                UserId = request.Service.CrafterId,
-                Message = $"Payment for {request.Service.Title} has been released.",
-                CreatedAt = DateTime.UtcNow,
-                IsRead = false
-            };
-            _notificationRepository.Add(notification);
-            await _notificationRepository.SaveAsync();
-
-            return RedirectToAction("CompletedRequests");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> RequestRefund(int requestId)
-        {
-            var request = await _requestRepository.GetByIdAsync(requestId);
-            if (request == null || request.Status != RequestStatus.Paid)
-            {
-                return NotFound();
+                await _stripeService.CreateRefundAsync(request.Payment.StripePaymentIntentId);
+                request.Payment.Status = PaymentStatus.Refunded;
+                request.Payment.DisputedAt = DateTime.UtcNow;
             }
 
-            StripeConfiguration.ApiKey = _stripeSettings.Value.SecretKey;
-            var refundService = new RefundService();
-            await refundService.CreateAsync(new RefundCreateOptions
-            {
-                PaymentIntent = request.PaymentIntentId
-            });
+            await _context.SaveChangesAsync();
 
-            request.Status = RequestStatus.Refunded;
-            _requestRepository.Update(request);
-            await _requestRepository.SaveAsync();
+            // Send notifications
+            await _emailSender.SendDisputeNotificationAsync(
+                request.ClientId,
+                request.Service?.CrafterId,
+                request.Id);
 
-            return RedirectToAction("RefundRequests");
+            return RedirectToAction("Details", new { id = requestId });
         }
-
     }
 
 }

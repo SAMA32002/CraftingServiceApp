@@ -240,41 +240,58 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClientSecret")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CrafterId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PaymentIntentId")
+                    b.Property<string>("Currency")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DisputedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("RequestId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("StripeClientSecret")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RequestId");
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CrafterId");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("StripePaymentIntentId")
+                        .IsUnique();
 
                     b.ToTable("Payments");
                 });
@@ -344,6 +361,15 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Property<string>("CustomStreet")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDisputed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -352,10 +378,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("RequestDate")
@@ -377,15 +399,17 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("StripeClientSecret")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("ClientId");
-
-                    b.HasIndex("PaymentId")
-                        .IsUnique()
-                        .HasFilter("[PaymentId] IS NOT NULL");
 
                     b.HasIndex("SelectedAddressId");
 
@@ -741,11 +765,29 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
                 {
-                    b.HasOne("CraftingServiceApp.Domain.Entities.Request", null)
-                        .WithMany()
-                        .HasForeignKey("RequestId")
+                    b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Client")
+                        .WithMany("PaymentsAsClient")
+                        .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("CraftingServiceApp.Domain.Entities.ApplicationUser", "Crafter")
+                        .WithMany("PaymentsAsCrafter")
+                        .HasForeignKey("CrafterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CraftingServiceApp.Domain.Entities.Request", "Request")
+                        .WithOne("Payment")
+                        .HasForeignKey("CraftingServiceApp.Domain.Entities.Payment", "RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Crafter");
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
@@ -779,11 +821,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CraftingServiceApp.Domain.Entities.Payment", "Payment")
-                        .WithOne("Request")
-                        .HasForeignKey("CraftingServiceApp.Domain.Entities.Request", "PaymentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("CraftingServiceApp.Domain.Entities.Address", "SelectedAddress")
                         .WithMany()
                         .HasForeignKey("SelectedAddressId")
@@ -801,8 +838,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Client");
-
-                    b.Navigation("Payment");
 
                     b.Navigation("SelectedAddress");
 
@@ -917,6 +952,10 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
                     b.Navigation("Notifications");
 
+                    b.Navigation("PaymentsAsClient");
+
+                    b.Navigation("PaymentsAsCrafter");
+
                     b.Navigation("Posts");
 
                     b.Navigation("ReceivedRequests");
@@ -931,12 +970,6 @@ namespace CraftingServiceApp.Infrastructure.Migrations
                     b.Navigation("Services");
                 });
 
-            modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Payment", b =>
-                {
-                    b.Navigation("Request")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Post", b =>
                 {
                     b.Navigation("Comments");
@@ -944,6 +977,9 @@ namespace CraftingServiceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("CraftingServiceApp.Domain.Entities.Request", b =>
                 {
+                    b.Navigation("Payment")
+                        .IsRequired();
+
                     b.Navigation("ProposedDates");
                 });
 
